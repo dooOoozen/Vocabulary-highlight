@@ -1,4 +1,4 @@
-[English](README.md) | 中文
+[English](README.en.md) | 中文
 
 # 词汇高亮（Vocabulary-highlight）— 你的英语阅读助手
 
