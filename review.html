@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>双击高亮单词</title>
+  <link rel="stylesheet" href="review.css">
+</head>
+<body>
+  <div class="app">
+    <!-- 左侧导航 -->
+    <aside class="sidebar">
+      <h1 class="logo">双击高亮单词</h1>
+      <nav class="nav">
+        <button class="nav-item" data-tab="list">生词本</button>
+        <button class="nav-item" data-tab="review">背单词</button>
+        <button class="nav-item" data-tab="memorized">已背</button>
+        <button class="nav-item" data-tab="sentences">句子收藏</button>
+        <button class="nav-item" data-tab="tutorial">使用教程</button>
+        <button class="nav-item" data-tab="generator">词书生成</button>
+        <button class="nav-item" data-tab="settings">设置</button>
+      </nav>
+      <div id="calendar" class="sidebar-calendar"></div>
+      <div id="stats" class="stats"></div>
+    </aside>
+
+    <main class="content">
+      <!-- 生词本 -->
+      <section id="tab-list" class="panel active">
+        <div class="toolbar">
+          <select id="book-select" class="book-select" title="切换词书"></select>
+          <input type="search" id="search" class="search" placeholder="搜索单词…">
+          <button id="word-delete-toggle" class="btn danger">删除</button>
+          <button id="word-grid-toggle" class="btn icon-btn" title="切换为网格视图" aria-label="切换视图"></button>
+          <button class="btn icon-btn settings-menu-btn" title="设置" aria-label="设置"></button>
+        </div>
+        <div id="word-selection-bar" class="selection-bar hidden">
+          <button id="select-all-words" class="btn">全选</button>
+          <button id="delete-selected-words" class="btn danger" disabled>删除选中</button>
+          <button id="cancel-word-delete" class="btn">取消</button>
+        </div>
+        <div class="panel-body">
+          <div class="list-wrap">
+            <div id="word-list" class="word-list"></div>
+            <div id="word-pager" class="pager hidden"></div>
+            <div id="empty" class="empty hidden">还没有生词，去网页上双击英文单词试试吧。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 背单词 -->
+      <section id="tab-review" class="panel">
+        <div id="review-setup" class="review-setup">
+          <div class="toolbar">
+            <select id="review-book-select" class="book-select" title="切换词书"></select>
+            <button class="btn icon-btn settings-menu-btn" title="设置" aria-label="设置"></button>
+          </div>
+
+          <div id="review-scope-group" class="review-scope-group hidden">
+            <label class="radio-label">范围</label>
+            <select id="review-scope" class="sort-select">
+              <option value="all">全背</option>
+              <option value="date">按日期</option>
+              <option value="source">按来源</option>
+            </select>
+            <select id="review-scope-value" class="sort-select hidden"></select>
+          </div>
+
+          <div class="review-mode-group">
+            <label class="radio-label"><input type="radio" name="review-mode" value="random" checked>全随机</label>
+            <label class="radio-label"><input type="radio" name="review-mode" value="batch">补充模式</label>
+            <span id="batch-size-wrap" class="batch-size hidden">
+              每批 <input type="number" id="batch-size" min="10" step="1" value="10"> 个词
+            </span>
+          </div>
+
+          <p>全随机按“不认识次数”加权抽取；补充模式先随机挑一批词，每认识一个就补充一个新词。</p>
+          <button id="start-review" class="btn primary">开始背单词</button>
+        </div>
+        <div id="review-card" class="review-card hidden">
+          <button id="review-close" class="review-close" title="终止背诵" type="button">×</button>
+          <div class="review-progress" id="review-progress"></div>
+          <div class="review-word-row">
+            <div class="review-word" id="review-word"></div>
+            <button class="lv-speaker" id="review-speaker" title="发音" type="button"></button>
+          </div>
+          <div class="review-phonetic" id="review-phonetic"></div>
+          <div class="review-unknown" id="review-unknown"></div>
+          <div class="review-examples" id="review-examples"></div>
+          <div class="review-answer hidden" id="review-answer"></div>
+          <div class="review-actions">
+            <button id="show-answer" class="btn">显示答案</button>
+            <button id="know" class="btn success hidden">认识</button>
+            <button id="dont-know" class="btn warn hidden">不认识</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 已背 -->
+      <section id="tab-memorized" class="panel">
+        <div class="toolbar">
+          <select id="memorized-book-select" class="book-select" title="切换词书"></select>
+          <input type="search" id="memorized-search" class="search" placeholder="搜索已背单词…">
+          <select id="memorized-sort" class="sort-select">
+            <option value="date">日期</option>
+            <option value="unknown">遗忘次数</option>
+          </select>
+          <button id="memorized-sort-dir" class="btn icon-btn" title="当前降序，点击切换为升序" aria-label="排序方向">↓</button>
+          <button id="re-add-toggle" class="btn primary">忘记</button>
+          <button id="memorized-delete-toggle" class="btn danger">删除</button>
+          <button id="memorized-grid-toggle" class="btn icon-btn" title="切换为网格视图" aria-label="切换视图"></button>
+          <button class="btn icon-btn settings-menu-btn" title="设置" aria-label="设置"></button>
+        </div>
+        <div id="memorized-selection-bar" class="selection-bar hidden">
+          <button id="select-all-memorized" class="btn">全选</button>
+          <button id="memorized-action-btn" class="btn primary" disabled>确定</button>
+          <button id="cancel-memorized" class="btn">取消</button>
+        </div>
+        <div class="panel-body">
+          <div class="list-wrap">
+            <div id="memorized-list" class="memorized-list"></div>
+            <div id="memorized-pager" class="pager hidden"></div>
+            <div id="memorized-empty" class="empty hidden">还没有已背单词。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 句子收藏 -->
+      <section id="tab-sentences" class="panel">
+        <div class="toolbar">
+          <input type="search" id="sentence-search" class="search" placeholder="搜索句子…">
+          <button id="sentence-delete-toggle" class="btn danger">删除</button>
+          <span id="sentences-info" class="muted"></span>
+          <button class="btn icon-btn settings-menu-btn" title="设置" aria-label="设置"></button>
+        </div>
+        <div id="sentence-selection-bar" class="selection-bar hidden">
+          <button id="select-all-sentences" class="btn">全选</button>
+          <button id="delete-selected-sentences" class="btn danger" disabled>删除选中</button>
+          <button id="cancel-sentence-delete" class="btn">取消</button>
+        </div>
+        <div class="panel-body">
+          <div class="list-wrap">
+            <div id="sentences-list" class="sentences-list"></div>
+            <div id="sentences-empty" class="empty hidden">还没有收藏的句子。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 使用教程 -->
+      <section id="tab-tutorial" class="panel">
+        <div class="tutorial">
+          <h2>使用教程</h2>
+
+          <div class="tutorial-card">
+            <h3>这个扩展能做什么</h3>
+            <p>一边浏览英文网页，一边把生词“顺手”收进生词本。扩展会：</p>
+            <ul>
+              <li><b>双击取词</b>：双击网页里的英文单词，自动高亮、还原词形（ate → eat）、查词典、发音并加入生词本；再次双击同一词即可移出。
+                选中网页上2～4 个英文单词组成的<b>短语</b>（如 <code>pull up stakes</code>、<code>kung fu</code>），松手后扩展会自动查本地词典。</li>
+              <li><b>自动收藏例句</b>（亮点）：双击单词加入生词本时，会顺手把该词所在的<b>整句</b>一并收藏为例句，方便结合语境记忆，无需手动整理。</li>
+              <li><b>全文高亮</b>：生词本和预设词书里的单词，在任意网页都会以主题色高亮，鼠标悬停即可发音并看释义。</li>
+              <li><b>划句翻译</b>：选中英文句子，点「译」或按快捷键（默认 Alt+T）即可就地翻译，还能收藏句子。</li>
+              <li><b>背单词</b>：按“不认识次数”加权抽词，忘记越多的单词出现越频繁；认识后按艾宾浩斯曲线安排复习。</li>
+              <li><b>预设词书</b>：一键导入中考 / 高考 / 四六级 / 考研 / 雅思 / 托福等开源词表，作为独立词书学习。</li>
+              <li><b>自定义词典</b>：导入你自己拥有的 MDX 词典，获得更专业的词典释义。</li>
+            </ul>
+          </div>
+
+          <div class="tutorial-card">
+            <h3>快速上手（三步）</h3>
+            <ol>
+              <li>在任意英文网页上<b>双击</b>一个不认识的单词，确认它已加入生词本并高亮，同时它所在的句子会自动收藏为例句。</li>
+              <li>点开扩展，进入<b>背单词</b>，选择词书后点击「开始背单词」。</li>
+              <li>看到单词先自己回忆，再点「显示答案」；认识点「认识」，不认识点「不认识」。</li>
+            </ol>
+            <div class="tutorial-try">
+              <p class="tutorial-try-title">直接在下面这段英文上双击一个单词试试（此处仅演示高亮与翻译，不会加入生词本）：</p>
+              <p id="tutorial-demo-text" class="tutorial-demo-text">Language learning opens a window to the world. Every unfamiliar word you meet is a small step forward, and reading every day quietly builds your vocabulary.</p>
+            </div>
+          </div>
+
+          <div class="tutorial-card">
+            <h3>常用操作</h3>
+            <ul>
+              <li><b>管理生词</b>：在「生词本」搜索、展开看释义、删除或清空；左上角可切换词书。</li>
+              <li><b>按来源学习</b>：背单词时若选的是「生词本」，可按“全部 / 某日期 / 某来源”筛选后再背。</li>
+              <li><b>两种背诵模式</b>：全随机模式（现有模式）；补充模式（一次随机挑一批，认识一个自动补一个）。</li>
+              <li><b>看进度</b>：左侧栏底部有月历，背诵过的日期会变成主题色，点标题可展开全年日历。</li>
+              <li><b>临时关高亮</b>：网页右侧的小圆钮，点击可关闭当前网页的高亮，再点恢复。</li>
+              <li><b>设置</b>：配置翻译接口密钥、划句快捷键、主题色、词典导入与优先级等。</li>
+            </ul>
+          </div>
+
+
+          <div class="tutorial-card">
+            <h3>注意事项</h3>
+            <ul>
+              <li>数据全部保存在本地 <code>chrome.storage.local</code> 与 IndexedDB，不上传；仅在你使用联网翻译/词典下载时访问对应服务。</li>
+              <li>翻译接口需自行申请密钥（有道 / 百度 / 谷歌 / 彩云 / DeepSeek / Gemini / GPT）；本地词典命中时不调用接口，可省配额。</li>
+              <li>预设词表与自定义 MDX 词典来自网络开源仓库或你自行获取，扩展只负责下载解析，不内置、不分发数据，请确保拥有合法使用权。</li>
+              <li>网页高亮会跳过脚本、输入框、代码块等区域，避免破坏页面；在极高频刷新的页面上可能有少量性能开销。</li>
+              <li>划句翻译默认快捷键为 Alt+T。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 设置 -->
+      <section id="tab-settings" class="panel">
+        <div class="settings-layout">
+          <nav id="settings-nav" class="settings-nav" aria-label="设置导航"></nav>
+          <div id="settings-cards" class="settings-cards">
+        <div class="settings-card" data-setting="provider">
+          <h2>翻译接口</h2>
+          <p class="hint">
+            选择一个翻译引擎，并填写对应的 API 密钥。查不到的词与句子翻译都会走这里。
+            密钥仅保存在本地浏览器中，不会上传到任何第三方服务器（仅发送给你所选的翻译服务商）。
+          </p>
+
+          <div class="provider-option">
+            <label class="provider-name">
+              <input type="radio" name="provider" value="youdao" checked>
+              有道翻译
+            </label>
+            <div class="provider-fields">
+              <label for="youdao-app-key">appKey（应用ID）</label>
+              <input type="text" id="youdao-app-key" class="text-input" placeholder="例如：00xxxxxxxxxxxxxx">
+              <label for="youdao-app-secret">appSecret（应用密钥）</label>
+              <input type="password" id="youdao-app-secret" class="text-input" placeholder="例如：xxxxxxxxxxxxxxxxxxxx">
+              <a class="provider-link" href="https://ai.youdao.com/" target="_blank" rel="noopener">申请地址：https://ai.youdao.com/</a>
+            </div>
+          </div>
+
+          <div class="provider-option">
+            <label class="provider-name">
+              <input type="radio" name="provider" value="baidu">
+              百度翻译
+            </label>
+            <div class="provider-fields">
+              <label for="baidu-app-id">appid（应用ID）</label>
+              <input type="text" id="baidu-app-id" class="text-input" placeholder="例如：20200101000000000">
+              <label for="baidu-secret">密钥（secret）</label>
+              <input type="password" id="baidu-secret" class="text-input" placeholder="例如：xxxxxxxxxxxxxxxx">
+              <a class="provider-link" href="https://api.fanyi.baidu.com/" target="_blank" rel="noopener">申请地址：https://api.fanyi.baidu.com/</a>
+            </div>
+          </div>
+
+          <div class="provider-option">
+            <label class="provider-name">
+              <input type="radio" name="provider" value="google">
+              谷歌翻译
+            </label>
+            <div class="provider-fields">
+              <label for="google-api-key">API Key</label>
+              <input type="text" id="google-api-key" class="text-input" placeholder="例如：AIzaSy...">
+              <a class="provider-link" href="https://cloud.google.com/translate" target="_blank" rel="noopener">申请地址：https://cloud.google.com/translate</a>
+            </div>
+          </div>
+
+          <div class="provider-option">
+            <label class="provider-name">
+              <input type="radio" name="provider" value="caiyun">
+              彩云小译
+            </label>
+            <div class="provider-fields">
+              <label for="caiyun-token">Token</label>
+              <input type="password" id="caiyun-token" class="text-input" placeholder="例如：xxxxxxxxxxxxxxxxxxxxxxxx">
+              <a class="provider-link" href="https://dashboard.caiyunapp.com/" target="_blank" rel="noopener">申请地址：https://dashboard.caiyunapp.com/</a>
+            </div>
+          </div>
+
+          <div class="provider-option">
+            <label class="provider-name">
+              <input type="radio" name="provider" value="deepseek">
+              DeepSeek
+            </label>
+            <div class="provider-fields">
+              <label for="deepseek-api-key">API Key</label>
+              <input type="password" id="deepseek-api-key" class="text-input" placeholder="例如：sk-...">
+              <label for="deepseek-model">模型（可选，默认 deepseek-chat）</label>
+              <input type="text" id="deepseek-model" class="text-input" placeholder="deepseek-chat">
+              <a class="provider-link" href="https://platform.deepseek.com/" target="_blank" rel="noopener">申请地址：https://platform.deepseek.com/</a>
+            </div>
+          </div>
+
+          <div class="provider-option">
+            <label class="provider-name">
+              <input type="radio" name="provider" value="gemini">
+              Gemini
+            </label>
+            <div class="provider-fields">
+              <label for="gemini-api-key">API Key</label>
+              <input type="password" id="gemini-api-key" class="text-input" placeholder="例如：AIzaSy...">
+              <label for="gemini-model">模型（可选，默认 gemini-1.5-flash）</label>
+              <input type="text" id="gemini-model" class="text-input" placeholder="gemini-1.5-flash">
+              <a class="provider-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">申请地址：https://aistudio.google.com/apikey</a>
+            </div>
+          </div>
+
+          <div class="provider-option">
+            <label class="provider-name">
+              <input type="radio" name="provider" value="gpt">
+              GPT / OpenAI
+            </label>
+            <div class="provider-fields">
+              <label for="gpt-api-key">API Key</label>
+              <input type="password" id="gpt-api-key" class="text-input" placeholder="例如：sk-...">
+              <label for="gpt-model">模型（可选，默认 gpt-4o-mini）</label>
+              <input type="text" id="gpt-model" class="text-input" placeholder="gpt-4o-mini">
+              <label for="gpt-base-url">接口地址（可选，兼容 OpenAI 的端点）</label>
+              <input type="text" id="gpt-base-url" class="text-input" placeholder="https://api.openai.com/v1/chat/completions">
+              <a class="provider-link" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">申请地址：https://platform.openai.com/api-keys</a>
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button id="save-config" class="btn primary">保存</button>
+            <button id="test-config" class="btn">测试翻译</button>
+          </div>
+          <div id="config-msg" class="config-msg"></div>
+        </div>
+
+        <div class="settings-card" data-setting="shortcut">
+          <h2>划句翻译快捷键</h2>
+          <p class="hint">
+            在网页上选中英文句子后，可按此快捷键翻译（默认 Alt+T）。
+          </p>
+          <label for="shortcut">快捷键</label>
+          <input type="text" id="shortcut" class="text-input" placeholder="例如：Alt+T">
+          <div class="settings-actions">
+            <button id="save-shortcut" class="btn primary">保存快捷键</button>
+          </div>
+          <div id="shortcut-msg" class="config-msg"></div>
+        </div>
+
+        <div class="settings-card" data-setting="appearance">
+          <h2>个性化设置</h2>
+          <p class="hint">调整主题色、暗黑模式、界面与悬浮窗字体。修改后立即生效并自动保存到本地。</p>
+
+          <div class="appearance-row">
+            <span class="appearance-label">主题色</span>
+            <input type="color" id="theme-color" class="color-input" value="#2563eb">
+          </div>
+
+          <div class="appearance-row">
+            <span class="appearance-label">网页高亮色</span>
+            <input type="color" id="highlight-web" class="color-input" value="#fff3b0">
+          </div>
+
+          <div class="appearance-row">
+            <span class="appearance-label">扩展高亮色</span>
+            <input type="color" id="highlight-ext" class="color-input" value="#fff3b0">
+          </div>
+
+          <div class="appearance-row">
+            <span class="appearance-label">右侧按钮颜色</span>
+            <input type="color" id="toggle-color" class="color-input" value="#2563eb">
+            <label class="switch"><input type="checkbox" id="toggle-color-follow"> 跟随主题色</label>
+          </div>
+
+          <div class="appearance-row">
+            <span class="appearance-label">右侧按钮透明度</span>
+            <input type="range" id="toggle-opacity" class="appearance-range" min="0.1" max="1" step="0.05" value="0.72">
+            <span id="toggle-opacity-value" class="muted">0.72</span>
+          </div>
+
+          <div class="appearance-row">
+            <span class="appearance-label">暗黑模式</span>
+            <label class="switch"><input type="checkbox" id="dark-mode"> 启用</label>
+          </div>
+
+          <div class="appearance-row">
+            <span class="appearance-label">中文字体</span>
+            <select id="cn-font" class="appearance-select"></select>
+          </div>
+
+          <div class="appearance-row">
+            <span class="appearance-label">英文字体</span>
+            <select id="en-font" class="appearance-select"></select>
+          </div>
+
+          <div class="appearance-row">
+            <span class="appearance-label">字体大小</span>
+            <input type="number" id="base-font-size" class="appearance-number" min="12" max="22" step="1" value="16"> px
+          </div>
+
+          <div class="appearance-row">
+            <span class="appearance-label">悬浮窗字体</span>
+            <select id="popup-font" class="appearance-select"></select>
+          </div>
+
+          <div class="appearance-row">
+            <span class="appearance-label">悬浮窗字号</span>
+            <input type="number" id="popup-font-size" class="appearance-number" min="12" max="24" step="1" value="14"> px
+          </div>
+
+          <div class="book-colors-section">
+            <div class="book-colors-title">词书高亮颜色</div>
+            <p class="hint">已导入的预设词书可在网页上高亮显示，并可为每本词书设置不同颜色。</p>
+            <div id="book-colors" class="book-colors"></div>
+          </div>
+
+          <div class="appearance-preview">
+            <div class="appearance-preview-title">预览</div>
+            <div class="preview-list">
+              <div class="preview-item">
+                <span class="preview-word">serendipity</span>
+                <span class="preview-phonetic">/ˌserənˈdɪpəti/</span>
+              </div>
+              <div class="preview-trans">n. 意外发现珍奇事物的能力</div>
+              <div class="preview-sentence">A serendipity discovery changed his life.</div>
+            </div>
+            <div class="preview-highlight-row">
+              <span class="preview-highlight-tag">网页</span>
+              <span id="preview-highlight-web" class="preview-highlight-sample">highlight</span>
+              <span class="preview-highlight-tag">扩展</span>
+              <span id="preview-highlight-ext" class="preview-highlight-sample">highlight</span>
+            </div>
+            <div class="preview-popup" id="preview-popup">
+              <div class="preview-popup-word">serendipity <span class="preview-phonetic">/ˌserənˈdɪpəti/</span></div>
+              <div class="preview-popup-text">n. 意外发现珍奇事物的能力</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card" data-setting="dictionary">
+          <h2>词典</h2>
+          <p class="hint">
+            扩展内置一份精简词典，可离线快速查询常见词；查不到的单词会回退到你所选的翻译接口。
+            你也可以从 GitHub 下载完整的 ECDICT 词典（约 66MB），解析出音标、英文释义、中文多义与词性后
+            缓存到本地，之后查询几乎零延迟。若下载失败，可到
+            <a href="https://github.com/skywind3000/ECDICT" target="_blank" rel="noopener">https://github.com/skywind3000/ECDICT</a>
+            手动下载 <code>ecdict.csv</code> 文件，再使用下方「本地载入」。
+          </p>
+          <div id="dict-status" class="muted">正在查询词典状态…</div>
+          <div class="settings-actions">
+            <button id="load-dict" class="btn">下载完整词典</button>
+            <button id="load-dict-local" class="btn">本地载入</button>
+            <input type="file" id="dict-file" accept=".csv,text/csv,text/plain" class="hidden">
+          </div>
+          <div id="dict-progress-wrap" class="hidden">
+            <div class="progress-bar"><div id="dict-progress-fill" class="progress-fill"></div></div>
+            <div id="dict-progress-text" class="muted"></div>
+          </div>
+          <div id="dict-error" class="hidden">
+            <div class="dict-error-head">
+              <span>加载失败，错误信息如下（可复制排查）：</span>
+              <button id="copy-dict-error" class="btn">复制错误信息</button>
+            </div>
+            <textarea id="dict-error-text" class="dict-error-text" readonly></textarea>
+          </div>
+
+          <div class="dict-subsection">
+            <h3>补充词典（合并）</h3>
+            <p class="hint">
+              若完整 ECDICT 仍有查不到的词（如 stiffen、shudder），可在此合并另一份
+              ECDICT 兼容的 CSV 词典（字段：word,phonetic,definition,translation,pos），
+              按单词覆盖/新增，不会清空已下载的完整词典。可填写任意开源词库的原始 CSV 地址，或本地载入合并。
+            </p>
+            <div class="settings-actions">
+              <input type="text" id="supplement-dict-url" class="text-input" placeholder="补充词典 CSV 地址（https://…）">
+              <button id="load-supplement-dict" class="btn">下载并合并</button>
+              <button id="load-supplement-dict-local" class="btn">本地载入并合并</button>
+              <input type="file" id="supplement-dict-file" accept=".csv,text/csv,text/plain" class="hidden">
+            </div>
+          </div>
+
+          <div class="dict-subsection">
+            <h3>预设词书</h3>
+            <p class="hint">
+              一键导入中考、高考、四级、六级、考研、雅思、托福等开源词表，可随时添加或移除。
+              词表数据均来自网络开源仓库，本扩展仅提供下载与导入能力，不内置、不分发任何词表数据。
+            </p>
+            <div id="preset-list" class="preset-list"></div>
+            <div class="preset-tools">
+              <span id="preset-enrich-status" class="muted"></span>
+            </div>
+            <div id="preset-error" class="config-msg err hidden"></div>
+            <div class="settings-actions">
+              <button id="edit-common-words" class="btn">编辑高频词和常见词</button>
+              <span class="muted">查看并增删「剔除高频词和常见词」会剔除的单词</span>
+            </div>
+          </div>
+
+          <div class="dict-cols">
+            <div class="dict-subsection">
+              <h3>词典查询优先级</h3>
+              <p class="hint">
+                查词时按以下顺序依次查询，越靠前优先级越高。内置精简词典、完整 ECDICT 与自定义词典统一参与排序。
+              </p>
+              <div id="dict-order-list" class="dict-order-list"></div>
+              <div class="settings-actions">
+                <button id="refresh-word-defs" class="btn">按当前优先级刷新生词本释义</button>
+                <span id="refresh-word-defs-status" class="muted"></span>
+              </div>
+            </div>
+
+            <div class="dict-subsection">
+              <h3>自定义词典（MDX，可多份）</h3>
+              <p class="hint">
+                可导入你自行获取的 MDict 词典文件（.mdx），如 LDOCE5++、OALD、COBUILD 等；可导入多份，优先级在左侧「词典查询优先级」中统一调整。
+                导入 .mdx 后，可在每份词典旁点击「导入 .mdd」加载配套资源包（CSS 样式 / 图片 / 音频），每份词典对应自己的 .mdd。
+                本扩展只提供解析与导入能力，不内置、不分发任何词典数据，请确保你拥有词典的合法使用权。
+                支持未加密、zlib 或未压缩的 MDict 2.0 格式；LZO 压缩或加密词典暂不支持。
+              </p>
+              <div id="custom-dict-list" class="custom-dict-list"></div>
+              <div class="settings-actions">
+                <button id="load-mdx" class="btn">导入 .mdx 文件</button>
+                <input type="file" id="mdx-file" accept=".mdx" class="hidden">
+              </div>
+              <div id="mdx-progress-wrap" class="hidden">
+                <div class="progress-bar"><div id="mdx-progress-fill" class="progress-fill"></div></div>
+                <div id="mdx-progress-text" class="muted"></div>
+              </div>
+              <div id="mdx-error" class="config-msg err hidden"></div>
+
+              <input type="file" id="mdd-file" accept=".mdd" class="hidden">
+              <div id="mdd-progress-wrap" class="hidden">
+                <div class="progress-bar"><div id="mdd-progress-fill" class="progress-fill"></div></div>
+                <div id="mdd-progress-text" class="muted"></div>
+              </div>
+              <div id="mdd-error" class="config-msg err hidden"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card" data-setting="export">
+          <h2>数据导出</h2>
+          <p class="hint">
+            将本扩展的数据导出为 JSON 文件，便于备份或迁移。可选择导出范围，并自行选择保存位置。
+          </p>
+          <label for="export-type">导出范围</label>
+          <select id="export-type" class="export-select">
+            <option value="all">全部数据（生词本 + 已背 + 收藏句子）</option>
+            <option value="words">生词本</option>
+            <option value="memorized">已背单词</option>
+            <option value="sentences">收藏的句子</option>
+          </select>
+          <div class="settings-actions">
+            <button id="export-data" class="btn primary">导出</button>
+          </div>
+          <div id="export-msg" class="config-msg"></div>
+        </div>
+
+        <div class="settings-card" data-setting="storage">
+          <h2>数据存储与清理</h2>
+          <p class="hint">
+            本扩展的额外数据保存在浏览器扩展自身的存储中，不在扩展安装目录内：
+          </p>
+          <ul class="storage-list">
+            <li><code>chrome.storage.local</code>：生词本、句子收藏、翻译接口配置。</li>
+            <li><code>IndexedDB（lv-dict）</code>：完整词典（约 66MB）与查询缓存。</li>
+          </ul>
+          <p class="hint">
+            这些数据位于 Chrome 的用户数据目录（LevelDB / IndexedDB 文件）。可在地址栏输入
+            <code>chrome://version</code> 查看「个人资料路径」定位。卸载扩展后可能残留，可点击下方按钮一键清理。
+          </p>
+          <div class="settings-actions">
+            <button id="clear-data" class="btn danger">一键清理全部数据</button>
+          </div>
+          <div id="clear-data-msg" class="config-msg"></div>
+        </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-generator" class="panel">
+        <div class="generator-wrap">
+          <h2>词书生成</h2>
+          <p class="hint">
+            上传英文文本文件（txt / epub），自动统计每个英文单词的出现频次并按次数排序（自动剔除乱码、人名等噪声词）；
+            可按「出现频率排名区间」生成词书，生成后可正常在网页高亮、背单词。
+          </p>
+
+          <div class="generator-upload">
+            <input type="file" id="gen-file" class="hidden" accept=".txt,.epub,text/plain,application/epub+zip">
+            <button id="gen-pick" class="btn primary">选择文件</button>
+            <span id="gen-file-name" class="muted"></span>
+            <button id="gen-start" class="btn" disabled>开始解析</button>
+          </div>
+          <div class="generator-row generator-subhint" style="margin-top: 20px;">
+            <label class="switch"><input type="checkbox" id="gen-remove-unknown"> 剔除词典中不存在的词（勾选后只保留词典收录的单词；未勾选时宁多勿漏）</label>
+          </div>
+
+          <div id="gen-progress-wrap" class="hidden">
+            <div class="progress-bar"><div id="gen-progress-fill" class="progress-fill"></div></div>
+            <div id="gen-progress-text" class="muted"></div>
+          </div>
+          <div id="gen-error" class="config-msg err hidden"></div>
+
+          <div id="gen-result" class="hidden">
+            <div id="gen-result-summary" class="muted"></div>
+            <div id="gen-removed" class="gen-removed hidden">
+              <button type="button" id="gen-removed-toggle" class="gen-removed-toggle">查看被过滤的词</button>
+              <div id="gen-removed-body" class="hidden">
+                <div class="gen-chip-toolbar">
+                  <span class="muted">按住鼠标在词上拖动可快速多选；点击单个词切换选中。</span>
+                  <button type="button" id="gen-restore" class="btn" disabled>恢复选中词</button>
+                </div>
+                <div id="gen-removed-list" class="gen-chip-list"></div>
+              </div>
+            </div>
+            <div class="settings-actions" style="margin-top: 20px;">
+              <button id="gen-download-csv" class="btn">下载 CSV 查看所有非过滤词汇</button>
+            </div>
+
+            <div class="generator-config">
+              <div class="generator-row">
+                <span class="generator-label">设置收录词的词频排名区间</span>
+                <div class="dual-range" id="gen-range">
+                  <div class="dual-range-track"></div>
+                  <div class="dual-range-fill" id="gen-range-fill"></div>
+                  <input type="range" id="gen-percent-min" class="dual-range-thumb dual-range-min" min="0" max="100" step="1" value="0" aria-label="不低于">
+                  <input type="range" id="gen-percent-max" class="dual-range-thumb dual-range-max" min="0" max="100" step="1" value="80" aria-label="不高于">
+                </div>
+                <span id="gen-percent-value" class="muted">0% ~ 80%</span>
+              </div>
+              <div class="generator-row generator-subhint">
+                <span class="muted">左点＝不低于（跳过最常出现的前 X%），右点＝不高于（只保留到第 Y% 为止）。</span>
+              </div>
+              <div class="generator-row">
+                <label class="switch"><input type="checkbox" id="gen-remove-common" checked> 剔除高频词和常见词</label>
+              </div>
+              <div class="generator-row">
+                <label for="gen-book-name">词书名称</label>
+                <input type="text" id="gen-book-name" class="text-input" placeholder="例如：我的英文书">
+              </div>
+              <div class="settings-actions">
+                <button id="gen-create" class="btn primary">生成词书</button>
+                <span id="gen-create-status" class="muted"></span>
+              </div>
+            </div>
+
+            <div id="gen-included" class="gen-removed hidden">
+              <button type="button" id="gen-included-toggle" class="gen-removed-toggle">查看收录词</button>
+              <div id="gen-included-body" class="hidden">
+                <div class="gen-chip-toolbar">
+                  <span class="muted">以下为按词频区间与「剔除高频词和常见词」过滤后最终收录的词；按住鼠标拖动多选，点「排除选中词」将其从词书中删除。</span>
+                  <button type="button" id="gen-exclude" class="btn danger" disabled>排除选中词</button>
+                </div>
+                <div id="gen-included-list" class="gen-chip-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="generator-books">
+            <h3>已生成的词书</h3>
+            <div id="gen-books-list" class="gen-books-list"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 网格视图设置弹窗 -->
+  <div id="grid-settings-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close-grid-settings></div>
+    <div class="modal-dialog">
+      <div class="modal-head">
+        <span>网格视图设置</span>
+        <button id="grid-settings-close" class="btn icon-btn" title="关闭" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="grid-setting-row">
+          <span class="grid-setting-label">每行卡片数</span>
+          <input type="range" id="grid-settings-cols" class="grid-cols-range" min="2" max="8" step="1" value="4">
+          <span id="grid-settings-cols-value" class="grid-cols-value">4</span>
+        </div>
+        <div class="grid-setting-row">
+          <span class="grid-setting-label">最多同时翻转卡片数</span>
+          <input type="number" id="grid-settings-maxflip" class="text-input grid-setting-number" min="1" max="20" step="1" value="3">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页边距设置弹窗 -->
+  <div id="margin-settings-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close-margin-settings></div>
+    <div class="modal-dialog">
+      <div class="modal-head">
+        <span>页边距设置</span>
+        <button id="margin-settings-close" class="btn icon-btn" title="关闭" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="grid-setting-row">
+          <span class="grid-setting-label">左右页边距</span>
+          <input type="range" id="margin-settings-value" class="grid-cols-range" min="0" max="200" step="2" value="28">
+          <span id="margin-settings-value-label" class="grid-cols-value">28px</span>
+        </div>
+        <p class="hint">调整生词本、背单词、已背、句子收藏四个页面的左右页边距（margin，到屏幕边缘的距离），立即生效并自动保存。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑高频词和常见词弹窗 -->
+  <div id="common-words-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close-common-words></div>
+    <div class="modal-dialog modal-wide">
+      <div class="modal-head">
+        <span>编辑高频词和常见词</span>
+        <button id="common-words-close" class="btn icon-btn" title="关闭" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">勾选「剔除高频词和常见词」后，下面这些词会在「添加预设词书」或「生成词书」时被剔除。按住鼠标拖动多选后点「删除选中」，可把它们移出剔除名单（重新保留在词书中）；也可在下方手动添加新的高频词。</p>
+        <div class="common-words-toolbar">
+          <input type="text" id="common-words-add-input" class="text-input" placeholder="输入要添加的单词，如 hello">
+          <button id="common-words-add" class="btn">添加</button>
+          <button id="common-words-delete" class="btn danger" disabled>删除选中</button>
+        </div>
+        <div id="common-words-list" class="gen-chip-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 齿轮设置菜单（页边距 / 网格视图设置 / 清空生词本等，按页面动态生成） -->
+  <div id="settings-menu" class="settings-menu hidden"></div>
+
+  <script src="tts.js"></script>
+  <script src="lemmatizer.js"></script>
+  <script src="dict-store.js"></script>
+  <script src="mdx.js"></script>
+  <script src="review.js"></script>
+</body>
+</html>

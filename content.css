@@ -1,0 +1,467 @@
+/* content.css —— 内容脚本注入样式 */
+
+/* 高亮生词的样式：浅黄色底、圆角，视觉上明显但不过度干扰阅读。
+   文字用深色，保证在深色主题（白字）网页上高亮后依然清晰可读。 */
+.lv-highlight {
+  background-color: #fff3b0;
+  color: #111827;
+  border-radius: 3px;
+  padding: 0 1px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.lv-highlight:hover {
+  background-color: #ffe066;
+}
+
+/* 双击后弹出的结果浮层。 */
+.lv-popup {
+  position: fixed;
+  z-index: 2147483647;
+  max-width: 360px;
+  min-width: 180px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #111827;
+}
+
+/* 弹窗/行内译文内的按钮显式继承字体，跟随“悬浮窗字体”设置。 */
+.lv-popup button,
+.lv-inline-trans button,
+.lv-sentence-btn {
+  font-family: inherit;
+}
+
+.lv-popup-word {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 1.285em;
+  font-weight: 700;
+  color: #111827;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lv-popup-phonetic {
+  font-size: 0.72em;
+  font-weight: 400;
+  color: #6b7280;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+.lv-popup-trans {
+  margin-top: 6px;
+  font-size: 1em;
+  color: #2563eb;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.lv-popup-explains {
+  margin-top: 4px;
+  color: #4b5563;
+  font-size: 0.857em;
+  word-break: break-word;
+}
+
+.lv-popup-meta {
+  margin-top: 6px;
+  font-size: 0.857em;
+  color: #16a34a;
+}
+
+.lv-popup-error {
+  margin-top: 6px;
+  color: #dc2626;
+  font-size: 0.857em;
+  word-break: break-word;
+}
+
+.lv-popup-btn {
+  margin-top: 8px;
+  padding: 5px 12px;
+  font-size: 0.857em;
+  color: #fff;
+  background: #2563eb;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.lv-popup-btn:hover {
+  background: #1d4ed8;
+}
+
+/* 发音按钮（由 tts.js 的 speakerButton 生成）。 */
+.lv-speaker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 2px;
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.lv-speaker:hover {
+  color: #1d4ed8;
+}
+
+/* 结构化释义：中文多义（含词性标签）+ 英文释义 */
+.lv-senses {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lv-sense {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.lv-sense-pos {
+  flex: 0 0 auto;
+  min-width: 26px;
+  font-size: 0.857em;
+  font-style: italic;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-radius: 4px;
+  padding: 0 5px;
+  text-align: center;
+}
+
+.lv-sense-text {
+  color: #111827;
+  font-size: 0.928em;
+  word-break: break-word;
+}
+
+.lv-defs-title {
+  margin-top: 8px;
+  font-size: 0.857em;
+  color: #6b7280;
+}
+
+.lv-defs {
+  margin: 2px 0 0;
+  padding-left: 16px;
+  color: #4b5563;
+  font-size: 0.928em;
+  word-break: break-word;
+}
+
+.lv-defs li {
+  margin: 1px 0;
+}
+
+/* hover 详情浮层：更紧凑 */
+.lv-hover-popup {
+  max-width: 300px;
+}
+
+/* 划句翻译小按钮（颜色跟随主题色 --lv-accent，由 content.js 注入） */
+.lv-sentence-btn {
+  position: fixed;
+  z-index: 2147483646;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--lv-accent, #2563eb);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.lv-sentence-btn:hover {
+  background: color-mix(in srgb, var(--lv-accent, #2563eb) 82%, black);
+}
+
+/* 划句翻译结果：嵌入原文，识别原句字体样式并融入，紧跟原句（行内） */
+.lv-inline-trans {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 1px 8px 1px 6px;
+  border-left: 3px solid var(--lv-accent, #2563eb);
+  background: color-mix(in srgb, var(--lv-accent, #2563eb) 8%, transparent);
+  border-radius: 4px;
+  line-height: 1.6;
+  vertical-align: middle;
+}
+
+.lv-inline-trans-badge {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lv-accent, #2563eb);
+  background: color-mix(in srgb, var(--lv-accent, #2563eb) 12%, transparent);
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.lv-inline-trans-text {
+  word-break: break-word;
+  vertical-align: middle;
+}
+
+.lv-inline-trans-btn {
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--lv-accent, #2563eb);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--lv-accent, #2563eb) 40%, white);
+  border-radius: 4px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.lv-inline-trans-btn:hover {
+  background: color-mix(in srgb, var(--lv-accent, #2563eb) 8%, transparent);
+}
+
+.lv-inline-trans-close {
+  border: none;
+  color: #6b7280;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 6px;
+}
+
+.lv-inline-trans-close:hover {
+  color: #dc2626;
+  background: transparent;
+}
+
+/* 网页右侧逐站点高亮开关：外层容器可拖拽，主按钮默认主题色，关闭后置灰。
+   颜色 / 透明度由 content.js 通过 --lv-toggle-color / --lv-toggle-opacity 写入。 */
+.lv-toggle-wrap {
+  position: fixed;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2147483645;
+  /* 固定为圆钮尺寸：弹出层用绝对定位浮在左侧，展开时不改变圆钮位置，避免 hover 闪烁。 */
+  width: 30px;
+  height: 30px;
+  /* 容器本身不拦截鼠标，仅按钮响应点击，避免透明区域挡住页面内容。 */
+  pointer-events: none;
+}
+
+.lv-toggle {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  /* 用 !important 锁定几何尺寸，避免某些站点（如 Material 的 button{min-width:64px}）把圆钮拉成椭圆。 */
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background-color: var(--lv-toggle-color, #2563eb);
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  opacity: var(--lv-toggle-opacity, 0.72);
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.lv-toggle:hover {
+  opacity: 1;
+}
+
+/* 关闭当前网页高亮后置灰（颜色由 JS 写入变量，这里仅作兜底）。 */
+.lv-toggle.lv-toggle-off {
+  background-color: #6b7280;
+}
+
+/* 拖拽时的视觉反馈。 */
+.lv-toggle-wrap.lv-toggle-dragging .lv-toggle {
+  cursor: grabbing;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
+}
+
+/* 滚动浏览网页时淡化主按钮，悬停时恢复。 */
+.lv-toggle-wrap.lv-toggle-faded .lv-toggle {
+  opacity: calc(var(--lv-toggle-opacity, 0.72) * 0.45);
+}
+.lv-toggle-wrap.lv-toggle-faded:hover .lv-toggle {
+  opacity: 1;
+}
+
+/* 悬停时在圆钮左侧展开的弹出层：内含词书屏蔽菜单与“关闭所有网页高亮”按钮。
+   用绝对定位浮在圆钮左侧，展开/收起不参与圆钮布局，避免 hover 时圆钮位置变化导致闪烁。 */
+.lv-toggle-popover {
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+}
+
+.lv-toggle-wrap:hover .lv-toggle-popover {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* “关闭所有网页高亮”按钮。 */
+.lv-toggle-global {
+  padding: 6px 12px;
+  pointer-events: auto;
+  border: 1px solid var(--lv-accent, #2563eb);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--lv-accent, #2563eb);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+}
+
+.lv-toggle-global.lv-toggle-global-on {
+  color: #fff;
+  background: var(--lv-accent, #2563eb);
+}
+
+/* 词书屏蔽菜单：可单独屏蔽某本词书的高亮。显隐由 .lv-toggle-popover 统一控制。 */
+.lv-toggle-books {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.lv-toggle-book {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #fff;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+.lv-toggle-book:hover {
+  border-color: #9ca3af;
+}
+
+.lv-toggle-book-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+/* 已被屏蔽的词书：置灰并加删除线，表示其高亮被单独关闭。 */
+.lv-toggle-book.lv-toggle-book-off {
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  text-decoration: line-through;
+}
+
+.lv-toggle-book.lv-toggle-book-off .lv-toggle-book-dot {
+  background: #d1d5db !important;
+}
+
+/* 暗黑模式下的双击结果弹窗 / hover 悬浮详情 */
+.lv-popup.dark {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.lv-popup.dark .lv-popup-word {
+  color: #f8fafc;
+}
+
+.lv-popup.dark .lv-popup-phonetic {
+  color: #94a3b8;
+}
+
+.lv-popup.dark .lv-popup-trans {
+  color: #60a5fa;
+}
+
+.lv-popup.dark .lv-popup-explains {
+  color: #cbd5e1;
+}
+
+.lv-popup.dark .lv-sense-text {
+  color: #e2e8f0;
+}
+
+.lv-popup.dark .lv-sense-pos {
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.lv-popup.dark .lv-defs-title {
+  color: #94a3b8;
+}
+
+.lv-popup.dark .lv-defs {
+  color: #cbd5e1;
+}
+
+.lv-popup.dark .lv-popup-meta {
+  color: #4ade80;
+}
+
+.lv-popup.dark .lv-popup-error {
+  color: #f87171;
+}

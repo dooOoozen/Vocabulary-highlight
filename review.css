@@ -1,0 +1,2371 @@
+/* review.css —— 生词本独立标签页样式（左侧导航布局） */
+
+/* 主题变量：主题色、暗黑模式、字体均在「设置 → 个性化」中调整。
+   --accent 由 JS 写入 html 内联样式；--accent-hover/soft/border 用 color-mix 自动派生。 */
+:root {
+  --accent: #2563eb;
+  --accent-hover: color-mix(in srgb, var(--accent) 82%, black);
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, white);
+  --accent-border: color-mix(in srgb, var(--accent) 45%, white);
+
+  /* 中性色 */
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --text: #1f2937;
+  --text-strong: #111827;
+  --text-medium: #4b5563;
+  --text-muted: #6b7280;
+  --text-faint: #9ca3af;
+  --hover-bg: #f3f4f6;
+  --hover-bg-soft: #f9fafb;
+
+  /* 语义色 */
+  --success: #16a34a;
+  --success-soft: #f0fdf4;
+  --warn: #f59e0b;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --danger-border: #fecaca;
+  --highlight-bg: #fff3b0;
+
+  /* 字体 */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  --base-font-size: 16px;
+}
+
+/* 暗黑模式：覆盖中性色与语义色（保持用户所选主题色）。 */
+body.dark {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --border: #334155;
+  --border-strong: #475569;
+  --text: #e2e8f0;
+  --text-strong: #f8fafc;
+  --text-medium: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
+  --hover-bg: #273449;
+  --hover-bg-soft: #1e293b;
+
+  --accent-soft: color-mix(in srgb, var(--accent) 24%, black);
+  --accent-border: color-mix(in srgb, var(--accent) 60%, white);
+
+  --success: #22c55e;
+  --success-soft: rgba(34, 197, 94, 0.16);
+  --warn: #fbbf24;
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.16);
+  --danger-border: #7f1d1d;
+  --highlight-bg: #facc15;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* 根字号 = 可调的基础字体大小，其余字号均用 rem 跟随缩放。 */
+html {
+  font-size: var(--base-font-size);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* 表单控件默认不继承父级字体，需显式继承以跟随个性化字体设置。 */
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+/* 整体布局：左侧固定导航 + 右侧内容 */
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* 左侧导航 */
+.sidebar {
+  width: 200px;
+  flex: 0 0 200px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 20px 12px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  margin: 0 8px 20px;
+  font-size: 1.25rem;
+  color: var(--text-strong);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: var(--text-medium);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background: var(--hover-bg);
+}
+
+.nav-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.stats {
+  padding: 10px 14px 14px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.8;
+}
+
+/* ---------- 侧栏背诵日历（月历 ↔ 全年） ---------- */
+.sidebar-calendar {
+  margin-top: auto;
+  padding: 8px 10px 4px;
+  border-top: 1px solid var(--border);
+}
+
+.cal-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.cal-nav {
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.cal-nav:hover {
+  background: var(--hover-bg);
+  color: var(--text);
+}
+
+.cal-title {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-medium);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 2px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-title:hover {
+  background: var(--hover-bg);
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-weekdays {
+  margin-top: 4px;
+}
+
+.cal-wd {
+  text-align: center;
+  font-size: 0.625rem;
+  color: var(--text-faint);
+}
+
+.cal-cell {
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  color: var(--text-faint);
+  border-radius: 4px;
+}
+
+.cal-cell.active {
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.cal-cell.active:hover {
+  filter: brightness(1.12);
+}
+
+.cal-cell.today {
+  box-shadow: inset 0 0 0 1px var(--accent-border);
+}
+
+.cal-empty {
+  background: transparent;
+}
+
+.cal-year {
+  max-height: 46vh;
+  overflow-y: auto;
+}
+
+/* 全年视图滚动条使用主题色的淡色，避免默认滚动条在侧栏中过于突兀。 */
+.cal-year::-webkit-scrollbar {
+  width: 8px;
+}
+.cal-year::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cal-year::-webkit-scrollbar-thumb {
+  background: var(--accent-soft);
+  border-radius: 4px;
+}
+.cal-year::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-border);
+}
+
+.cal-mini {
+  margin-top: 6px;
+}
+
+.cal-mini-title {
+  font-size: 0.625rem;
+  color: var(--text-faint);
+  margin-bottom: 2px;
+}
+
+.cal-mini .cal-cell {
+  height: 14px;
+  font-size: 0.56rem;
+}
+
+/* 内容区：面板列在剩余空间内水平居中 */
+.content {
+  flex: 1;
+  min-width: 0;
+  /* 左右页边距：到屏幕边缘（左侧为侧栏边缘）的距离，可在各页面的齿轮菜单中调整。 */
+  padding: 24px 0;
+  margin: 0 var(--page-margin, 28px);
+}
+
+.panel {
+  display: none;
+}
+
+.panel.active {
+  display: block;
+}
+
+/* 设置页占满内容区、取消水平居中（现在所有面板都占满内容区，边距由 --page-margin 控制）。 */
+#tab-settings.panel.active {
+  max-width: none;
+  margin: 0;
+}
+
+/* 网格视图下卡片列表占满可用宽度。 */
+.panel.active.grid-mode {
+  max-width: none;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* 通用按钮 */
+.btn {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-medium);
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+#refresh-word-defs {
+  margin-top: 16px;
+}
+
+.btn:hover {
+  background: var(--hover-bg-soft);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn.success {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.btn.warn {
+  background: var(--warn);
+  border-color: var(--warn);
+  color: #fff;
+}
+
+.btn.danger {
+  color: var(--danger);
+  border-color: var(--danger-border);
+}
+
+.btn.danger:hover {
+  background: var(--danger-soft);
+}
+
+/* 图标按钮：固定方形尺寸，用于切换视图 / 排序方向等 */
+.btn.icon-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+/* 齿轮设置菜单：悬浮在按钮下方，后续其他设置项可一并加入。 */
+.settings-menu {
+  position: fixed;
+  z-index: 200;
+  min-width: 160px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.settings-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-medium);
+  font-size: 0.875rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.settings-menu-item:hover {
+  background: var(--hover-bg);
+  color: var(--text-strong);
+}
+
+.settings-menu-item.danger {
+  color: var(--danger);
+}
+
+.settings-menu-item.danger:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* 工具栏 */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.search {
+  flex: 1;
+  padding: 9px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  font-size: 0.875rem;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.sort-select {
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  font-size: 0.875rem;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.book-select {
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  font-size: 0.875rem;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+/* 网格视图的“每行几个”滑条（仅网格视图下显示）。
+   独立一行，避免与工具栏组件并列导致被压缩。 */
+.grid-cols-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-bottom: 12px;
+}
+
+.grid-cols-range {
+  width: 96px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.grid-cols-value {
+  min-width: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ---------- 通用弹窗（网格视图设置） ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.modal-dialog {
+  position: relative;
+  z-index: 1;
+  width: 360px;
+  max-width: calc(100vw - 40px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.modal-dialog.modal-wide {
+  width: min(680px, calc(100vw - 40px));
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.grid-setting-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.grid-setting-label {
+  flex: 0 0 auto;
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.grid-setting-number {
+  width: 80px;
+  text-align: center;
+}
+
+.modal-body .hint {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.common-words-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.common-words-toolbar .text-input {
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+
+/* ---------- 自定义词典带样式释义（.mdd 资源渲染） ---------- */
+.styled-def {
+  margin: 8px 0;
+}
+
+.styled-def-frame {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  display: block;
+}
+
+/* 发音按钮 */
+.lv-speaker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 3px;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.lv-speaker:hover {
+  color: var(--accent-hover);
+}
+
+/* 多选框（生词本 / 已背 / 句子收藏通用） */
+.check {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+/* ---------- 生词本列表 ---------- */
+.word-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.word-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  animation: card-in 0.3s ease;
+}
+
+.word-item:hover {
+  border-color: var(--accent-border);
+}
+
+.word-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.word-head .word {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.word-head .phonetic {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.badge {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  background: var(--hover-bg);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.badge.memorized {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.word-head .delete {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 0.8125rem;
+}
+
+.word-head .delete:hover {
+  color: var(--danger);
+}
+
+.word-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.3s ease, opacity 0.25s ease;
+}
+
+.word-item.open .word-body {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.word-body-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.word-body-inner::before {
+  content: '';
+  display: block;
+  border-top: 1px dashed var(--border);
+  margin: 10px 0;
+}
+
+.word-item .trans {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.word-item .explains {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+/* 生词卡片中默认展示的例句 */
+.word-examples,
+.memorized-examples {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+.sentences {
+  margin-top: 8px;
+}
+
+.sentence {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--text-medium);
+  line-height: 1.6;
+  margin: 4px 0;
+}
+
+.sentence .text {
+  flex: 1;
+}
+
+.sentence b {
+  color: #111827;
+  background: var(--highlight-bg);
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-faint);
+  padding: 60px 0;
+  font-size: 0.9375rem;
+}
+
+/* ---------- 背单词 ---------- */
+.review-setup {
+  text-align: center;
+  padding: 80px 0;
+  color: var(--text-muted);
+}
+
+/* 背单词范围与模式配置 */
+.review-scope-group,
+.review-mode-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 12px auto;
+  flex-wrap: wrap;
+}
+
+.radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.batch-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: var(--text-medium);
+}
+
+.batch-size input {
+  width: 64px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.review-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 56px 36px;
+  text-align: center;
+  margin-top: 8px;
+  position: relative;
+}
+
+/* 背单词卡片右上角淡色叉：点击终止背诵。 */
+.review-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.review-close:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.review-progress {
+  color: var(--text-faint);
+  font-size: 0.875rem;
+  margin-bottom: 28px;
+}
+
+.review-word-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.review-word {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+}
+
+.review-word-row .lv-speaker {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+}
+
+.review-word-row .lv-speaker svg {
+  width: 24px;
+  height: 24px;
+}
+
+.review-phonetic {
+  margin-top: 12px;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.review-unknown {
+  margin-top: 8px;
+  color: var(--warn);
+  font-size: 0.875rem;
+}
+
+.review-examples {
+  margin: 24px auto 0;
+  max-width: 640px;
+  text-align: left;
+}
+
+.review-examples .examples-title {
+  color: var(--text-faint);
+  font-size: 0.8125rem;
+  margin-bottom: 8px;
+}
+
+.review-examples .sentence {
+  font-size: 0.9375rem;
+}
+
+.review-answer {
+  margin-top: 28px;
+  font-size: 1.25rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.review-answer .explains {
+  margin-top: 6px;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.review-actions {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+.review-actions .btn {
+  font-size: 1rem;
+  padding: 12px 28px;
+  border-radius: 8px;
+}
+
+/* ---------- 已背 ---------- */
+.memorized-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.date-group-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-medium);
+  padding-bottom: 6px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.date-chevron {
+  transition: transform 0.2s ease;
+  color: var(--text-faint);
+}
+
+.date-group.collapsed .date-chevron {
+  transform: rotate(-90deg);
+}
+
+.date-group.collapsed .date-group-body {
+  display: none;
+}
+
+/* 面板主体：右侧列表 */
+.panel-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.list-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scroll-margin-top: 76px;
+}
+
+/* 从日历点击定位到某个日期时，短暂高亮该日期分组作为反馈。 */
+.date-group.date-flash {
+  animation: date-flash 1.2s ease-out;
+}
+
+@keyframes date-flash {
+  0% { background: var(--accent-soft); border-radius: 8px; }
+  100% { background: transparent; }
+}
+
+/* 来源分组：每个来源网页一个小组，标题可点击跳转 */
+.source-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 12px;
+  border-left: 2px solid var(--border);
+}
+
+.source-group-title {
+  font-size: 0.8125rem;
+  color: var(--text-medium);
+}
+
+.source-group-title a {
+  color: var(--accent);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.source-group-title a:hover {
+  text-decoration: underline;
+}
+
+/* 单个单词的来源行（已背列表点击展开后显示） */
+.source-line {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.source-line a {
+  color: var(--accent);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.source-line a:hover {
+  text-decoration: underline;
+}
+
+/* 删除/批量操作的选择模式工具栏 */
+.selection-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+}
+
+.memorized-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  animation: card-in 0.3s ease;
+}
+
+.memorized-item:hover {
+  border-color: var(--accent-border);
+}
+
+.memorized-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.memorized-head .check {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.memorized-head .word {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.memorized-head .phonetic {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.memorized-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.3s ease, opacity 0.25s ease;
+}
+
+.memorized-item.open .memorized-body {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.memorized-body-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.memorized-body-inner::before {
+  content: '';
+  display: block;
+  border-top: 1px dashed var(--border);
+  margin: 10px 0;
+}
+
+.memorized-item .trans {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* ---------- 网格视图与翻转卡片（瀑布流） ---------- */
+.word-list.grid,
+.memorized-list.grid {
+  display: block; /* 覆盖列表视图的 flex 布局，让多列瀑布流 column-count 生效 */
+  column-count: var(--grid-cols, 4);
+  column-gap: 12px;
+}
+
+.word-card {
+  position: relative;
+  break-inside: avoid;
+  margin-bottom: 12px;
+  perspective: 1000px;
+  cursor: pointer;
+  animation: card-in 0.3s ease;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.word-card-inner {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+}
+
+.word-card.flipped .word-card-inner {
+  transform: rotateY(180deg);
+}
+
+.word-card-face {
+  grid-area: 1 / 1;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.word-card-back {
+  transform: rotateY(180deg);
+}
+
+.word-card-word-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.word-card-word {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  word-break: break-word;
+}
+
+.word-card-phonetic {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.word-card-example {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 0.8125rem;
+  color: var(--text-medium);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.word-card-example-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.word-card-example b {
+  background: var(--highlight-bg);
+  padding: 0 2px;
+  border-radius: 2px;
+  color: #111827;
+}
+
+.word-card-back .trans {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* 选择模式：点击卡片任意位置即可选中/取消，选中后显示高亮描边与右上角勾选标记。 */
+.selectable {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.selectable.selected {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.selectable.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+}
+
+/* ---------- 使用教程 ---------- */
+.tutorial {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.tutorial h2 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+
+.tutorial-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.tutorial-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.0625rem;
+  color: var(--accent);
+}
+
+.tutorial-card p {
+  margin: 0 0 10px;
+  color: var(--text-medium);
+  line-height: 1.7;
+}
+
+.tutorial-card ul,
+.tutorial-card ol {
+  margin: 0;
+  padding-left: 22px;
+  color: var(--text-medium);
+  line-height: 1.9;
+}
+
+.tutorial-card li {
+  margin: 4px 0;
+}
+
+.tutorial-card code {
+  background: var(--hover-bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.8125rem;
+}
+
+.tutorial-try {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
+.tutorial-try-title {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  margin: 0 0 10px;
+}
+
+/* 教程页内嵌英文示例段落：可双击试词。 */
+.tutorial-demo-text {
+  margin: 0;
+  padding: 14px 16px;
+  background: var(--hover-bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 2;
+  user-select: text;
+  cursor: text;
+}
+
+/* 双击后临时高亮的词（仅视觉提示，不入生词本）。 */
+.tutorial-hl {
+  background: var(--highlight-bg);
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+/* 教程试词弹窗：定位在单词附近，展示音标与译文。 */
+.tutorial-popup {
+  position: fixed;
+  z-index: 300;
+  min-width: 180px;
+  max-width: 340px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.tutorial-popup-word {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--text-strong);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tutorial-popup-phonetic {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.tutorial-popup-trans {
+  margin-top: 6px;
+  color: var(--text);
+}
+
+.tutorial-popup-meta {
+  margin-top: 8px;
+  color: var(--text-faint);
+  font-size: 0.75rem;
+}
+
+.tutorial-popup-error {
+  margin-top: 4px;
+  color: var(--danger);
+}
+
+/* ---------- 设置 ---------- */
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  scroll-margin-top: 76px;
+}
+
+/* 设置页两栏布局：左侧固定导航 + 右侧卡片内容 */
+.settings-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.settings-cards {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 设置页左侧导航：点击快速定位，并可上下移自定义模块顺序 */
+.settings-nav {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  flex: 0 0 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 16px;
+  z-index: 5;
+}
+
+.settings-nav-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-nav-link {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-medium);
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.settings-nav-link:hover {
+  background: var(--hover-bg);
+  color: var(--text);
+}
+
+.settings-nav-handle {
+  flex: 0 0 auto;
+  color: var(--text-faint);
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: grab;
+  user-select: none;
+  padding: 4px 2px;
+}
+
+.settings-nav-row.dragging {
+  opacity: 0.5;
+}
+
+.settings-nav-row.drag-over {
+  outline: 2px dashed var(--accent);
+  border-radius: 8px;
+}
+
+.settings-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.125rem;
+}
+
+.settings-card .hint {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+
+.settings-card label {
+  display: block;
+  font-size: 0.875rem;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.text-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.settings-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.config-msg {
+  margin-top: 12px;
+  font-size: 0.8125rem;
+  min-height: 18px;
+}
+
+.config-msg.ok {
+  color: var(--success);
+}
+
+.config-msg.err {
+  color: var(--danger);
+}
+
+/* ---------- 词典：预设词表 / 自定义 MDX ---------- */
+.dict-subsection {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.dict-subsection h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+/* 词典查询优先级与自定义词典并排显示 */
+.dict-cols {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.dict-cols .dict-subsection {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.preset-link {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.preset-link:hover {
+  text-decoration: underline;
+}
+
+.preset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.preset-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.preset-name {
+  flex: 0 0 64px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.preset-count {
+  flex: 1;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.custom-dict-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.custom-dict-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.custom-dict-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.875rem;
+  word-break: break-all;
+}
+
+.custom-dict-count {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+/* ---------- 个性化设置 ---------- */
+.appearance-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.appearance-row .appearance-label {
+  flex: 0 0 110px;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.color-input {
+  width: 52px;
+  height: 34px;
+  padding: 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.appearance-select,
+.appearance-number {
+  padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  font-size: 0.875rem;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.appearance-number {
+  width: 80px;
+}
+
+.appearance-range {
+  width: 180px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.color-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.appearance-row .switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin: 0;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.appearance-row .switch input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* 个性化预览卡片：左侧为界面字体预览，右侧为悬浮窗预览 */
+.appearance-preview {
+  margin-top: 8px;
+  padding: 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+  background: var(--hover-bg-soft);
+}
+
+.appearance-preview-title {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  margin-bottom: 10px;
+}
+
+.preview-list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.preview-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.preview-word {
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.preview-phonetic {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.preview-trans {
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.preview-sentence {
+  color: var(--text-medium);
+  font-size: 0.8125rem;
+  margin-top: 4px;
+}
+
+/* 高亮色实时预览：网页 / 扩展两处独立色块 */
+.preview-highlight-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.preview-highlight-tag {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.preview-highlight-sample {
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.preview-popup {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  color: #111827;
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+.preview-popup-word {
+  font-size: 1.285em;
+  font-weight: 700;
+  color: #111827;
+}
+
+.preview-popup-text {
+  color: #2563eb;
+  font-size: 0.928em;
+  margin-top: 4px;
+}
+
+/* ---------- 翻译接口选择 ---------- */
+.provider-option {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.provider-option.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.provider-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.provider-name input[type='radio'] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.provider-fields {
+  display: none;
+}
+
+.provider-option.active .provider-fields {
+  display: block;
+}
+
+/* 接口申请地址链接 */
+.provider-link {
+  display: block;
+  margin: -6px 0 8px;
+  font-size: 0.8125rem;
+  color: var(--accent);
+  word-break: break-all;
+}
+
+/* 数据导出下拉框 */
+.export-select {
+  padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  font-size: 0.875rem;
+  background: var(--surface);
+  color: var(--text);
+  min-width: 280px;
+  margin-bottom: 16px;
+}
+
+/* ---------- 词典下载进度与错误 ---------- */
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+#dict-progress-text {
+  margin-top: 6px;
+}
+
+.dict-error-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 0.8125rem;
+  color: var(--danger);
+}
+
+.dict-error-text {
+  width: 100%;
+  height: 120px;
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid var(--danger-border);
+  border-radius: 7px;
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--danger);
+  background: var(--danger-soft);
+  resize: vertical;
+}
+
+/* ---------- 数据存储与清理 ---------- */
+.storage-list {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  color: var(--text-medium);
+  font-size: 0.8125rem;
+  line-height: 1.8;
+}
+
+.storage-list code,
+.settings-card .hint code {
+  background: var(--hover-bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.75rem;
+}
+
+.settings-card .hint a {
+  color: var(--accent);
+  word-break: break-all;
+}
+
+/* ---------- 结构化释义（生词本 / 已背 / 背单词答案） ---------- */
+.senses {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sense {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.sense-pos {
+  flex: 0 0 auto;
+  min-width: 24px;
+  font-size: 0.6875rem;
+  font-style: italic;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 4px;
+  padding: 0 4px;
+  text-align: center;
+}
+
+.sense-text {
+  color: var(--text-medium);
+  font-size: 0.8125rem;
+  word-break: break-word;
+}
+
+.defs-title {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
+.defs {
+  margin: 2px 0 0;
+  padding-left: 18px;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.defs li {
+  margin: 1px 0;
+}
+
+/* ---------- 句子收藏 ---------- */
+.sentences-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sentence-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.sentence-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.sentence-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sentence-item-time {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
+.sentence-item-head .delete {
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 0.8125rem;
+}
+
+.sentence-item-head .delete:hover {
+  color: var(--danger);
+}
+
+.sentence-item-en {
+  font-size: 0.9375rem;
+  color: var(--text-strong);
+  line-height: 1.6;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.sentence-item-en-text {
+  flex: 1;
+  word-break: break-word;
+}
+
+.sentence-item-en .lv-speaker {
+  margin-top: 2px;
+}
+
+.sentence-item-zh {
+  margin-top: 6px;
+  font-size: 0.875rem;
+  color: var(--accent);
+  line-height: 1.6;
+}
+
+/* ---------- 分页控件 ---------- */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.pager-btn {
+  padding: 6px 14px;
+}
+
+.pager-info {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.pager-input {
+  width: 64px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: center;
+  font-size: 0.8125rem;
+}
+
+/* ---------- 预设词表：剔除高频词和常见词 / 剔除已背单词 ---------- */
+.preset-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preset-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 0 12px 6px;
+}
+
+.preset-filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--text-medium);
+  cursor: pointer;
+}
+
+.preset-filter-label input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.preset-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ---------- 词典查询优先级（统一排序） ---------- */
+.dict-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dict-order-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.dict-order-name {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* ---------- 词书高亮颜色 ---------- */
+.book-colors-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.book-colors-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.book-colors {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.book-color-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.book-color-name {
+  flex: 0 0 80px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* ---------- 词书生成 ---------- */
+#tab-generator.panel.active {
+  max-width: none;
+  margin: 0;
+}
+
+.generator-wrap {
+  max-width: 860px;
+}
+
+.generator-wrap h2 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+
+.generator-wrap > .hint {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+
+.generator-upload {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.generator-config {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.generator-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.generator-row label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.generator-row .text-input {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 0;
+}
+
+.generator-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 双点滑块：单条轨道上两个可拖动滑块，用于选择词频排名区间。 */
+.dual-range {
+  position: relative;
+  flex: 1;
+  max-width: 360px;
+  height: 20px;
+}
+
+.dual-range-track,
+.dual-range-fill {
+  position: absolute;
+  top: 7px;
+  height: 6px;
+  border-radius: 999px;
+}
+
+.dual-range-track {
+  left: 0;
+  right: 0;
+  background: var(--border-strong);
+}
+
+.dual-range-fill {
+  background: var(--accent);
+  pointer-events: none;
+}
+
+.dual-range-thumb {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 20px;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: none;
+}
+
+.dual-range-thumb::-webkit-slider-runnable-track {
+  height: 20px;
+  background: transparent;
+  border: none;
+}
+
+.dual-range-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  cursor: pointer;
+}
+
+.dual-range-min {
+  z-index: 3;
+}
+
+.dual-range-max {
+  z-index: 2;
+}
+
+.generator-subhint {
+  margin-top: -8px;
+}
+
+.generator-subhint .muted {
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.generator-row .switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.generator-row .switch input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.gen-removed {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.gen-removed-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.gen-chip-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.gen-chip-toolbar .muted {
+  font-size: 0.75rem;
+}
+
+.gen-chip-list {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 240px;
+  overflow: auto;
+  padding: 2px;
+}
+
+.gen-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-medium);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  cursor: pointer;
+  user-select: none;
+}
+
+.gen-chip:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+
+.gen-chip.selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.generator-books {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.generator-books h3 {
+  margin: 0 0 12px;
+}
+
+.gen-books-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gen-book-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.gen-book-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.gen-book-count {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}

@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "双击高亮单词",
+  "version": "2.9.0",
+  "description": "双击网页英文单词即可高亮、翻译、发音并收藏入生词本，同时自动抓取所在句子作为例句；支持词形还原、短语查询、划句翻译、本地词典、预设词书与基于艾宾浩斯曲线的背单词复习。",
+  "permissions": ["storage", "unlimitedStorage"],
+  "host_permissions": [
+    "https://openapi.youdao.com/*",
+    "https://fanyi-api.baidu.com/*",
+    "https://translation.googleapis.com/*",
+    "https://api.interpreter.caiyunai.com/*",
+    "https://api.deepseek.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.openai.com/*",
+    "https://cdn.jsdelivr.net/*",
+    "https://raw.githubusercontent.com/*",
+    "https://api.dictionaryapi.dev/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "打开双击高亮单词"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["lemmatizer.js", "tts.js", "content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
