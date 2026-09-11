@@ -17,6 +17,11 @@ A Manifest V3 Chrome extension that turns web reading into vocabulary learning: 
 - **Ebbinghaus review** — weighted random selection by "unknown count"; words you forget appear more often.
 - **Sentence translation** — select an English sentence to translate it (default shortcut `Alt+T`), with optional saving.
 - **Visual statistics** — sidebar totals plus a monthly and yearly calendar.
+- **Wordbook generator** — upload a text or EPUB file, count word frequency, and generate a custom wordbook by frequency-rank range, with options to drop noise words and common words plus a downloadable CSV preview.
+- **Supplementary dictionary merge** — merge another ECDICT-compatible CSV (by URL or local file) to cover words the full ECDICT misses, without clearing existing entries.
+- **Editable common-word filter** — view, add, and remove the "high-frequency / common words" exclusion list.
+- **MDX resource files (.mdd)** — import `.mdd` resources (CSS / images / audio) alongside your `.mdx` dictionaries.
+- **Data export & cleanup** — one-click JSON export and local data cleanup.
 - **Local storage** — everything is stored in `chrome.storage.local` and IndexedDB; nothing is uploaded.
 
 ## Installation
@@ -64,6 +69,7 @@ The extension prefers local dictionaries; the translation API is only called for
 
 - **Built-in mini dictionary** (`dict-builtin.js`): ~100 high-frequency words, offline and instant.
 - **Full ECDICT dictionary**: click **Load full dictionary** in Settings to download and parse the ECDICT CSV (~66 MB) into IndexedDB.
+- **Supplementary dictionary (merge)**: merge another ECDICT-compatible CSV (by URL or local file) to cover words the full ECDICT misses, adding/overwriting by word without clearing existing entries.
 - **Preset wordbooks**: import open-source word lists (CET-4/CET-6, IELTS, TOEFL, etc.) as separate books.
 - **Custom MDX dictionaries**: import your own `.mdx` files (unencrypted, zlib/uncompressed MDict 2.0) with adjustable lookup priority.
 
