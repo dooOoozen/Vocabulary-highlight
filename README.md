@@ -1,106 +1,350 @@
-English | [中文](README.zh.md)
+[English](README.md) | 中文
 
-# Vocabulary-highlight — Your English Reading Assistant
+# 词汇高亮（Vocabulary-highlight）— 你的英语阅读助手
 
-> 中文名：词汇高亮（你的英语阅读助手）
+## 扩展简介
 
-A Manifest V3 Chrome extension that turns web reading into vocabulary learning: double-click any English word to highlight, translate, pronounce, and save it to your notebook — with inflection-aware highlighting, Ebbinghaus-based review, preset wordbooks, and sentence translation. All data stays local.
+「生词本」是一款运行在 Chrome 上的 **Manifest V3** 英语学习扩展，把「浏览网页时遇到的生词」和「系统化的背单词复习」无缝衔接起来：
 
-## Features
+- **遇到就记**：在任意网页双击一个英文单词，扩展会立即做词形还原（`ate` → `eat`、`cats` → `cat`、`bigger` → `big`），查询本地词典给出音标、词性、中文释义与英文释义，自动朗读，并把该词加入你的生词本。
+- **到处可见**：加入生词本的单词（含它各种变形，如 `eat/eats/ate/eaten/eating`）会在你之后浏览的所有网页中被高亮出来；鼠标移上去即可再次查看释义与发音，让生词在真实语境中反复出现。网页右侧有悬浮圆形开关，可随时关闭/恢复单个网页的高亮。
+- **科学复习**：内置基于「艾宾浩斯遗忘曲线」的背单词模块，按「不认识次数」加权抽词，忘记越多的词出现越频繁；点「认识」即移入已背并按间隔自动安排下次复习。生词本词书还支持按日期 / 来源筛选背诵，以及「全随机」和「补充模式」两种抽词方式。
+- **词书扩展**：可一键导入中考、高考、四六级、考研、雅思、托福等开源词表，也可导入你自行获取的 MDX 词典作为查词来源。
+- **划句翻译**：选中网页英文句子即可翻译并收藏，重复句子不再重复调用接口。
+- **可视化统计**：侧栏展示总生词 / 待背 / 已背数量，以及当月 / 全年日历，一眼看清每天是否背过单词。
 
-- **Double-click lookup + lemmatization** — double-click any English word on a page to reduce it to its lemma (`ate` → `eat`, `cats` → `cat`, `bigger` → `big`) and look it up instantly.
-- **Inflection-aware highlighting** — saved words are highlighted across every page you visit, including all inflections (`eat/eats/ate/eaten/eating`), with hover-to-pronounce and hover-to-review.
-- **Instant pronunciation** — auto-speak on save; pronunciation buttons in popups, the notebook, and the review page (Web Speech API).
-- **Local dictionary first** — built-in mini dictionary → full ECDICT dictionary → preset wordbooks → custom MDX dictionaries → translation API fallback.
-- **Preset wordbooks** — one-click import of CET-4/CET-6, IELTS, TOEFL, and more open-source word lists.
-- **Custom MDX dictionaries** — import your own LDOCE5++ / OALD / COBUILD `.mdx` dictionaries with adjustable lookup priority.
-- **Ebbinghaus review** — weighted random selection by "unknown count"; words you forget appear more often.
-- **Sentence translation** — select an English sentence to translate it (default shortcut `Alt+T`), with optional saving.
-- **Visual statistics** — sidebar totals plus a monthly and yearly calendar.
-- **Local storage** — everything is stored in `chrome.storage.local` and IndexedDB; nothing is uploaded.
+所有数据（生词、复习进度、句子收藏、密钥）都只保存在浏览器本地 `chrome.storage.local` 与 IndexedDB 中，**不上传任何服务器**，也不依赖账号登录。
 
-## Installation
+> 本扩展为开源项目，仅供个人学习使用。请遵守相关词库 / 词典的许可协议（详见文末「版权与数据来源声明」）。
 
-1. Open `chrome://extensions` in Chrome.
-2. Enable **Developer mode** (top right).
-3. Click **Load unpacked** and select this project folder.
-4. Click the toolbar icon to open the vocabulary notebook.
+## 功能特性
 
-## Translation API Configuration
+- **双击取词 + 词形还原**：双击任意网页英文单词，自动还原词形（`ate` → `eat`、`cats` → `cat`、`bigger` → `big`），变形词视为同一词。
+- **全局高亮变形**：加入生词本后，该词及其各种时态/单复数/比较级（`eat/eats/ate/eaten/eating`）在任何网页都会被黄色高亮，支持动态加载内容。
+- **自动发音 + 发音按钮**：加入时自动朗读；弹窗、生词本、背单词、已背页面均有发音按钮（基于浏览器 Web Speech API）。
+- **词典级释义弹窗**：显示音标、英文解释、中文多义与词性（如 `industry` 的 `un 工业 / n 产业 / n 行业 / un 勤劳`）。
+- **高亮词 hover**：鼠标移到已高亮单词时自动发音，并弹出结构化释义与发音按钮。
+- **本地词典优先**：内置精简词典 → 完整 ECDICT 词典 → 预设词表 → 自定义 MDX 词典（可多份、按优先级，均缓存到 IndexedDB）→ 翻译 API 兜底；查不到单词或翻译句子时才调用 API。
+- **预设生词词表**：一键导入/移除中考、高考、四级、六级、考研、雅思、托福等开源词表；导入后作为独立「词书」，可在生词本 / 背单词 / 已背页切换查看。
+- **预设词表释义与例句**：可用本地 ECDICT 一键为预设词表补充音标、词性与多义；也可后台逐词联网补充真实例句并缓存。
+- **词书过滤 / 恢复**：已导入的预设词书可「剔除高频词和常见词（a / am / desk 等小学词汇）」与「剔除已背单词」，取消勾选即可恢复。
+- **词书网页高亮**：已导入的预设词书单词同样会在各网页高亮，且可为每本词书单独设置高亮颜色。
+- **自定义词典**：可导入多份自行获取的 LDOCE5++ / OALD / COBUILD 等 `.mdx` 词典文件，并在设置中调整调用优先级；仅提供解析与导入能力、不内置不分发数据。
+- **词书切换**：生词本 / 背单词 / 已背页面左上角可切换「生词本 / 已导入预设词书 / 全部」，用户自行添加的生词视为一本独立词书。
+- **大词书分页**：生词本与已背列表按每页 100 条分页渲染，避免载入大词书时一次性创建数千个 DOM 节点导致卡顿。
+- **统一词典查询优先级**：内置精简词典、完整 ECDICT、预设词表与各自定义词典在同一列表中统一排序，越靠前越先查。
+- **划句翻译**：选中英文句子后出现小按钮，点击或按快捷键（默认 Alt+T，可在设置中修改）翻译；译文固定显示在原句上方，像注音一样、不改变页面排版。
+- **句子收藏**：划句译文可收藏到本地，重复翻译同一句不再调用 API；在「句子收藏」页按时间倒序浏览、发音、删除。
+- **生词本折叠卡片**：默认只显示单词，展开后显示翻译与例句，例句可发音。
+- **背单词加权复习**：按“不认识次数”加权随机抽词，忘记越多的单词出现越频繁；每个单词出现自动发音，例句先于答案展示。
+- **背单词范围与模式**：词书为「生词本」时可额外选择「全背 / 按日期 / 按来源」；支持「全随机」与「补充模式」（先随机挑一批词，每认识一个补充一个新词，可设每批数量，最低 10）。
+- **逐站点高亮开关**：浏览网页时右侧悬浮圆形按钮，点击即可关闭/恢复当前网页的生词高亮，逐站点记忆。
+- **日期分组与导航**：生词本 / 已背 / 句子收藏按日期分组、可点击折叠，左侧日期导航栏点击可快速定位到某一天。
+- **点击/拖拽多选**：所有删除操作改为点击卡片任意位置选中，并支持按住鼠标拖拽批量选中。
+- **侧栏统计与日历**：侧栏统计计入所有已导入预设词书，并提供当月 / 全年日历，标记有背诵记录的日期。
+- **使用教程**：左侧菜单内置「使用教程」，说明扩展亮点、使用方法、步骤与注意事项。
+- **已背 + 艾宾浩斯曲线**：点击“认识”后移入已背，按日期分组展示；按艾宾浩斯间隔自动放回待背列表；支持多选忘记词。
+- **本地存储**：所有数据保存在浏览器 `chrome.storage.local`，不上传。
 
-The extension prefers local dictionaries; the translation API is only called for words or sentences it cannot find locally. Supported providers: **Youdao, Baidu, Google, Caiyun, DeepSeek, OpenAI (GPT), and Google Gemini**. Choose a provider in **Settings**, fill in the credentials, save, then click **Test translation**.
-
-### Youdao (default)
-1. Go to [Youdao AI Cloud](https://ai.youdao.com/), create an app, and enable the **Text Translation** service.
-2. Copy the **appKey** and **appSecret** into Settings.
-
-### Baidu
-1. Go to the [Baidu Translation Open Platform](https://fanyi-api.baidu.com/) and enable **General Text Translation**.
-2. Copy the **appid** and **secret** into Settings.
-
-### Google (Cloud Translation)
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/), create a project, and enable the **Cloud Translation API**.
-2. Create an **API key** under *Credentials* and paste it into Settings.
-
-### Caiyun (小译)
-1. Go to the [Caiyun Open Platform](https://dashboard.caiyunapp.com/) and sign up.
-2. Create an app to get a **Token**, then paste it into Settings.
-
-### DeepSeek
-1. Go to the [DeepSeek Platform](https://platform.deepseek.com/) and create an API key.
-2. Paste it into Settings; the default model is `deepseek-chat` (configurable).
-
-### OpenAI (GPT / any OpenAI-compatible endpoint)
-1. Get an API key from the [OpenAI Platform](https://platform.openai.com/).
-2. Paste it into Settings; the default model is `gpt-4o-mini` and the default endpoint is `https://api.openai.com/v1/chat/completions`. You can also set a custom `baseUrl` and model for other OpenAI-compatible services.
-
-### Google Gemini
-1. Get an API key from [Google AI Studio](https://aistudio.google.com/).
-2. Paste it into Settings; the default model is `gemini-1.5-flash` (configurable).
-
-> All credentials are stored locally in `chrome.storage.local` and are never uploaded.
-
-## Dictionaries
-
-- **Built-in mini dictionary** (`dict-builtin.js`): ~100 high-frequency words, offline and instant.
-- **Full ECDICT dictionary**: click **Load full dictionary** in Settings to download and parse the ECDICT CSV (~66 MB) into IndexedDB.
-- **Preset wordbooks**: import open-source word lists (CET-4/CET-6, IELTS, TOEFL, etc.) as separate books.
-- **Custom MDX dictionaries**: import your own `.mdx` files (unencrypted, zlib/uncompressed MDict 2.0) with adjustable lookup priority.
-
-Lookup order: built-in → full ECDICT → preset wordbooks → custom dictionaries → query cache → translation API.
-
-## Project Structure
+## 目录结构
 
 ```
 line_vocabulary/
-├── manifest.json     # Manifest V3 (permissions, host_permissions, content scripts, icons)
-├── background.js     # Service worker: dictionary lookup, API config, dictionary download/parse
-├── lemmatizer.js     # Lightweight lemmatization and inflection generation
-├── tts.js            # Text-to-speech (Web Speech API)
-├── dict-builtin.js   # Built-in mini dictionary
-├── dict-store.js     # IndexedDB wrapper (ECDICT, cache, preset, custom dictionaries)
-├── mdx.js            # MDict (.mdx) parser
-├── content.js        # Content script: double-click, lemmatize, highlight, sentence translation
-├── content.css       # In-page highlight and popup styles
-├── review.html       # Notebook / review / settings page
-├── review.js         # Notebook / review / settings logic
-├── review.css        # Notebook / review / settings styles
-└── icons/            # Extension icons (16/48/128)
+├── manifest.json     # 扩展清单（Manifest V3）：权限、host 权限、内容脚本、图标、版本号
+├── background.js     # Service Worker 后台：词典查询（内置/ECDICT/翻译API）、API 配置、词典下载与解析
+├── lemmatizer.js     # 轻量词形还原与变形生成（ate→eat、cats→cat、bigger→big；生成变形用于高亮）
+├── tts.js            # 英文发音（Web Speech API）与发音按钮组件
+├── dict-builtin.js   # 内置精简词典（约百个高频词，离线零延迟查询）
+├── dict-store.js     # IndexedDB 封装：完整 ECDICT 词典、查询缓存、预设词表与自定义词典的读写
+├── mdx.js            # MDict(.mdx) 词典解析器：把用户自行提供的词典解析为纯文本释义
+├── content.js        # 内容脚本：双击取词、词形还原、翻译弹窗、生词高亮、划句翻译、自动发音
+├── content.css       # 网页内高亮与双击/悬浮弹窗样式（含暗黑模式样式）
+├── review.html       # 扩展独立标签页：生词本 / 背单词 / 已背 / 句子收藏 / 设置
+├── review.js         # 标签页全部交互逻辑（列表/网格、搜索、排序、删除、个性化设置）
+├── review.css        # 标签页样式（含瀑布流网格、翻转卡片、暗黑模式变量）
+└── icons/            # 扩展图标（16 / 48 / 128）
 ```
 
-## Data Sources & Copyright
+### 各文件职责说明
 
-This extension does **not** bundle or distribute any dictionary or word-list data. All third-party data is downloaded or imported by the user; the extension only provides download links and parsing/storage.
+| 文件 | 职责 |
+| --- | --- |
+| `manifest.json` | 声明扩展权限（`storage`、`unlimitedStorage`）、翻译接口的 `host_permissions`、内容脚本注入范围与图标。 |
+| `background.js` | 后台服务工作者：处理 `dictLookup`、`testProvider`、`loadDict` 等消息，协调词典与翻译 API 查询。 |
+| `lemmatizer.js` | 提供 `lemmatize` / `lemmatizeCandidates` / `getInflections`，用于把双击词还原为原型并生成全部变形。 |
+| `tts.js` | 基于 `speechSynthesis` 的朗读封装，以及生成「喇叭」发音按钮的 `speakerButton`。 |
+| `dict-builtin.js` | 内置精简词典，覆盖常见高频词，离线秒查。 |
+| `dict-store.js` | 使用 IndexedDB 保存完整 ECDICT 词典、查询缓存、预设词表（`preset`）与自定义词典（`custom`），提供增删查清接口。 |
+| `mdx.js` | 浏览器端 MDict(.mdx) 解析器：解析未加密、zlib/未压缩的 MDict 2.0 词典，提取纯文本释义写入自定义词典。 |
+| `content.js` | 注入每个网页：识别双击单词、还原词形、查询并弹窗、高亮生词及其变形、划句翻译、自动发音。 |
+| `content.css` | 网页内 `.lv-highlight` 高亮样式与 `.lv-popup` 弹窗样式（含 `.dark` 暗黑样式）。 |
+| `review.html` | 扩展自身的单页界面结构，左侧导航 + 五个面板（生词本/背单词/已背/句子收藏/设置）。 |
+| `review.js` | 标签页交互：数据渲染、网格/列表切换、搜索、排序、批量删除、个性化外观设置与实时预览。 |
+| `review.css` | 标签页样式：主题变量、暗黑模式、瀑布流网格、3D 翻转卡片、平滑动画。 |
 
-| Data | Source | Notes |
+## 更新日志（Changelog）
+
+> 版本号规则：每次迭代更新自动 `+0.1`，并在此记录当次更新内容。
+
+### v2.8.0（当前版本）
+
+- 新增：网页右侧悬浮圆形开关，点击即可关闭 / 恢复当前网页的生词高亮（逐站点记忆，存于 `disabledSites`）。
+- 新增：生词本 / 已背 / 句子收藏按日期分组可折叠，左侧新增日期导航栏，点击日期快速定位到对应分组。
+- 调整：所有删除 / 批量操作改为「点击卡片任意位置选中」，并支持按住鼠标拖拽多选（不再使用复选框）。
+- 新增：背单词卡片右上角淡色「×」，点击可随时终止背诵并返回选书界面。
+- 新增：左侧菜单新增「使用教程」，说明扩展亮点、使用方法、步骤与注意事项。
+- 调整：侧栏统计计入所有已导入预设词书；侧栏新增当月日历与全年日历，标记有背诵记录的日期。
+- 新增：背单词当词书为「生词本」时，可额外选择「全背 / 按日期 / 按来源」；新增「全随机」与「补充模式」（先随机挑一批词，每认识一个补充一个新词，可设每批数量，最低 10）。
+- 文档：完善 README 详细介绍与版权声明；版本号 `2.7.0 → 2.8.0`。
+
+### v2.7.0
+
+- 新增：生词本与已背列表分页渲染（每页 100 条），避免载入大词书时一次性渲染数千条导致卡顿。
+- 新增：「设置 - 词典」中预设词表支持「补充本地释义」（用本地 ECDICT 批量补音标/词性多义/英文释义）与「后台补充例句」（逐词联网获取真实例句并缓存）。
+- 新增：词典查询优先级统一排序——内置精简词典、完整 ECDICT、预设词表与各自定义词典在同一列表参与上移/下移排序。
+- 新增：已导入的预设词书支持「剔除高频词和常见词 / 剔除已背单词」，取消勾选即可恢复；过滤状态存于 `presetFilters`。
+- 新增：预设词书单词在各网页同样高亮，并可在「个性化设置」中为每本词书单独设置高亮颜色（`appearance.bookColors`）。
+- 调整：新增 `presetRevision` 版本号，预设词表增删或过滤变化后通知 content script 重新拉取高亮词集。
+- 文档：更新 README；版本号 `2.6.0 → 2.7.0`。
+
+### v2.6.0
+
+- 新增：自定义词典支持导入多份，并可在「设置 - 词典」中上移/下移调整调用优先级（查找时按列表顺序逐词典查询）。
+- 新增：预设生词词表作为独立「词书」出现在生词本 / 背单词 / 已背页面；左上角新增「词书」切换下拉，可在「生词本 / 各已导入预设词书 / 全部」间切换。
+- 新增：用户自行添加的生词视为一本独立「词书」（`own`），预设词书的复习进度独立存储，不与生词本混淆。
+- 调整：`dict-store.js` 的 `custom` 存储升级为 `dictId\u0000word` 复合主键（DB 版本 `2 → 3`），自定义词典元信息（`customDicts`）存于 `chrome.storage.local`。
+- 文档：更新 README；版本号 `2.5.0 → 2.6.0`。
+
+### v2.5.0
+
+- 新增：「设置 - 词典」加入「预设生词词表」，可从开源词表一键导入/移除中考、高考、四级、六级、考研、雅思、托福词汇。
+- 新增：「设置 - 词典」加入「自定义词典（MDX）」，可导入自行获取的 LDOCE5++ / OALD / COBUILD 等 `.mdx` 词典文件（仅提供解析与导入能力，不内置、不分发词典数据）。
+- 新增：本地查询链接入预设词表与自定义词典（内置词典 → ECDICT → 预设词表 → 自定义词典 → 查询缓存 → 翻译 API）。
+- 新增：`mdx.js` MDict 解析器，支持未加密、zlib/未压缩的 MDict 2.0 格式；LZO 压缩或加密词典会给出明确提示。
+- 优化：网页悬浮窗释义支持多行换行显示（自定义词典多行释义不挤压成一行）。
+- 文档：更新 README；版本号 `2.4.0 → 2.5.0`。
+
+### v2.4.0
+
+- 新增：划选短语后自动发音，短语悬浮窗新增「加入生词本」按钮。
+- 修复：短语词形还原（如 `stood up` 可识别为 `stand up` 并查询本地词典）。
+- 新增：设置页为各翻译接口提供「申请地址」链接。
+- 新增：接入 DeepSeek / Gemini / GPT（OpenAI 兼容）大模型翻译接口。
+- 新增：设置页新增「数据导出」，可一键导出为 JSON（生词本 / 已背单词 / 收藏句子），并选择保存路径。
+- 文档：更新 README；版本号 `2.3.0 → 2.4.0`。
+
+### v2.3.0
+
+- 修复：切换视图时顶部搜索框等部件随网格视图变长（将工具栏/滑条/选择栏限制为固定最大宽度居中，卡片容器仍铺满）。
+- 修复：更改字体后多个页面字体未同步（表单控件与网页弹窗按钮显式继承字体）。
+- 新增：选中 2~4 个英文词（短语）松手后自动用本地词典查询并弹出悬浮窗释义，不再调用翻译 API。
+- 修复：网格视图下例句发音按钮消失，生词本与已背卡片均补回例句发音按钮。
+- 文档：更新 README；版本号 `2.2.0 → 2.3.0`。
+
+### v2.2.0
+
+- 调整：已背排序改为「日期 / 遗忘次数」两个字段选项，正序/倒序用箭头图标按钮切换。
+- 修复：网格视图下卡片未占满整行、离页面边缘太远（网格模式下放宽面板最大宽度）。
+- 调整：切换视图按钮改为图标；「每行几个卡片」滑条独立成行，不再与搜索框/排序/删除并列，避免切换视图时组件被压缩。
+- 修复：网格视图下进入删除模式时复选框遮挡卡片内容（为复选框预留左侧空间）。
+- 调整：「重新加入待背」更名为「忘记词」。
+- 调整：点击「删除 / 本」后按钮不再消失，避免搜索框宽度来回变化。
+- 文档：更新 README；版本号 `2.1.0 → 2.2.0`。
+
+### v2.1.0
+
+- 修复：更改「扩展高亮色」后，生词本 / 背单词 / 已背页面的高亮颜色不跟随更新（暗黑模式下 `body.dark` 默认高亮色覆盖了用户选择）。
+- 调整：网格视图的「每行几个卡片」滑条移到工具栏最右侧，不改变其它组件的位置。
+- 修复：网格视图下无论滑条滑到几，页面始终只有一列（列表视图的 `display:flex` 覆盖了 `column-count`，导致瀑布流失效）。
+- 新增：从网格视图切换回列表视图时也增加平滑淡入动画。
+- 文档：补充 README 项目结构与各文件职责、更新日志；版本号 `2.0.0 → 2.1.0`。
+
+### v2.0.0（历史累积更新）
+
+以下为 v2.0.0 阶段按用户要求逐步加入/修复的内容汇总：
+
+1. 取消「从本地扫描字体」，移除 `queryLocalFonts` / `local-fonts` 权限。
+2. 个性化设置拆分「中文字体 / 英文字体」，悬浮窗字体与字号可调，并附带预览卡片。
+3. 修复变形词高亮 Bug：双击 `conditioning` 不再存成 `conditione`，hover 正常显示释义，例句中的 `conditioning` 也能高亮。
+4. 所有删除操作统一为「先点删除按钮 → 再显示复选框和全选按钮」，已背页面同样加入删除功能。
+5. 已背单词点击后展开释义并显示来源。
+6. 释义展开增加平滑动画。
+7. 生词本 / 已背页面支持切换为网格视图，卡片正面显示音标、例句、发音，点击后 3D 翻转显示释义。
+8. 网格视图优化：「每行几个卡片」改为进度条选择、切换按钮置于最右侧、改为瀑布流自适应高度、切换动画。
+9. 修复词形还原过度矫正：双击 `However` 不再被识别成 `howe`。
+10. 已背页面、句子收藏页面加入搜索框；已背单词默认显示例句；点击单词或例句区域均可展开释义。
+11. 已背页面新增排序下拉：按日期或「不认识次数」正序 / 倒序排列。
+12. 个性化设置新增「网页高亮色 / 扩展高亮色」，二者分开保存并实时预览。
+13. 暗黑模式下，双击单词弹出的悬浮窗同步切换为暗黑样式。
+
+## 安装步骤
+
+1. 打开 Chrome，地址栏输入 `chrome://extensions` 并回车。
+2. 打开右上角「开发者模式」开关。
+3. 点击左上角「加载已解压的扩展程序」。
+4. 选择本项目文件夹 `line_vocabulary`。
+5. 安装完成后，点击工具栏扩展图标即可打开生词本。
+
+## 配置翻译 API
+
+扩展优先使用本地词典，只有查不到的单词和句子翻译才会调用翻译接口。支持有道、百度、谷歌、彩云小译、DeepSeek、OpenAI(GPT)、Google Gemini 等接口；在「设置」中选择要用的接口并填写对应密钥，保存后点「测试翻译」验证。所有密钥仅保存在本地 `chrome.storage.local`，不会上传到任何服务器。
+
+### 有道（默认接口）
+1. 前往 [有道智云](https://ai.youdao.com/) 注册登录，创建应用并开通「文本翻译」服务。
+2. 获取 **应用 ID（appKey）** 与 **应用密钥（appSecret）**，填入设置。
+
+### 百度翻译
+1. 前往 [百度翻译开放平台](https://fanyi-api.baidu.com/) 注册并开通「通用文本翻译」。
+2. 获取 **APP ID（appid）** 与 **密钥（secret）**，填入设置。
+
+### 谷歌（Google Cloud Translation）
+1. 前往 [Google Cloud Console](https://console.cloud.google.com/) 创建项目，启用 Cloud Translation API。
+2. 在「凭据」中创建 API 密钥（API Key），填入设置。
+
+### 彩云小译
+1. 前往 [彩云小译开放平台](https://dashboard.caiyunapp.com/) 注册登录。
+2. 创建应用获取 **Token**，填入设置。
+
+### DeepSeek
+1. 前往 [DeepSeek 开放平台](https://platform.deepseek.com/) 注册并创建 API Key。
+2. 填入设置；默认模型 `deepseek-chat`，可在设置中修改。
+
+### OpenAI（GPT / 其它 OpenAI 兼容端点）
+1. 前往 [OpenAI Platform](https://platform.openai.com/) 获取 API Key。
+2. 填入设置；默认模型 `gpt-4o-mini`，默认端点 `https://api.openai.com/v1/chat/completions`。也可填写其它 OpenAI 兼容服务的 baseUrl 与模型。
+
+### Google Gemini
+1. 前往 [Google AI Studio](https://aistudio.google.com/) 获取 API Key。
+2. 填入设置；默认模型 `gemini-1.5-flash`，可在设置中修改。
+
+## 词典说明
+
+- **内置精简词典**（`dict-builtin.js`）：约 100 个高频词的离线查询，零延迟。
+- **完整 ECDICT 词典**：在「设置」页点击「加载完整词典」，扩展会从 raw.githubusercontent 下载 ECDICT 完整版 CSV（约 66MB），解析出音标、英文释义（definition）、中文多义与词性（pos）后缓存到 IndexedDB，后续查询几乎零延迟。
+- **预设生词词表**：在「设置 - 词典」可一键导入中考、高考、四级、六级、考研、雅思、托福等开源词表，可随时添加或移除；数据来自网络开源仓库，扩展仅提供下载与导入能力。导入后每个词表作为独立「词书」，可在生词本 / 背单词 / 已背页左上角切换查看。
+- **自定义词典（MDX）**：可导入多份你自行获取的`.mdx` 词典文件，并在「设置 - 词典」中上移/下移调整调用优先级；扩展只提供解析与导入能力，不内置、不分发任何词典数据，请确保拥有合法使用权。支持未加密、zlib 或未压缩的 MDict 2.0 格式。
+- 查找顺序（可在「设置 - 词典」中统一排序）：内置词典 / 完整 ECDICT / 预设词表 / 各自定义词典，按用户设置的优先级依次查询，再回退到查询缓存 → 翻译 API。
+
+## 版权与数据来源声明
+
+本扩展**不内置、不分发任何词典数据或词表数据**。所有第三方数据均由用户自行下载、导入，扩展仅提供下载入口与解析 / 存储能力。请在使用前确认你拥有相应数据的使用权。
+
+| 数据 | 来源 | 说明 |
 | --- | --- | --- |
-| ECDICT | [skywind3000/ECDICT](https://github.com/skywind3000/ECDICT) | Open-source EN-CN dictionary (MIT). |
-| Preset word lists | [KyleBing/english-vocabulary](https://github.com/KyleBing/english-vocabulary), [leotse28/AGMess](https://github.com/leotse28/AGMess) | Open-source word lists. |
-| Custom MDX | User-provided | The extension only parses `.mdx` files you supply. |
-| Translation APIs | Youdao / Baidu / Google / Caiyun / DeepSeek / etc. | Credentials are user-provided and stored locally. |
+| ECDICT 完整词典 | [skywind3000/ECDICT](https://github.com/skywind3000/ECDICT) | 开源英汉词典（MIT License）。由用户点击「加载完整词典」后从 raw.githubusercontent 下载，扩展负责解析并缓存到本地。 |
+| 预设生词词表 | [KyleBing/english-vocabulary](https://github.com/KyleBing/english-vocabulary)、[leotse28/AGMess](https://github.com/leotse28/AGMess) | 开源词表仓库。由用户点击导入后按原链接下载，扩展仅提供下载入口与解析，不打包、不分发。 |
+| 自定义 MDX 词典 | 用户自行获取 | 扩展仅提供 `.mdx` 文件解析与导入能力（未加密、zlib / 未压缩的 MDict 2.0），请确保拥有合法使用权。 |
+| 翻译 API（有道 / 百度 / 谷歌 / 彩云 / DeepSeek 等） | 各服务商 | 密钥由用户自行申请并保存在本地，扩展仅按你的配置发起请求。 |
+
+如果你是本扩展所引用开源项目（ECDICT、english-vocabulary 等）的权利人，认为引用方式不当，欢迎联系我们调整或移除。
+
+> 发布到 Chrome Web Store 时，请勿在扩展包中打包任何受版权保护的词典 / 词表文件；仅在用户操作时按官方链接下载，并保留上述来源与许可声明。
+
+## 使用方法
+
+| 操作 | 效果 |
+| --- | --- |
+| 双击网页英文单词 | 还原词形 + 翻译 + 自动发音 + 加入生词本 |
+| 再次双击同一单词（或其变形） | 从生词本移出，取消高亮 |
+| 鼠标移到高亮单词 | 自动发音 + 弹出音标、英文解释、中文多义与词性 |
+| 选中英文句子 | 出现「译」按钮，点击或按快捷键（默认 Alt+T）翻译，译文显示在原句上方 |
+| 点击译文「收藏」 | 保存句子与译文到「句子收藏」，重复翻译不再调用 API |
+| 点击扩展图标 | 打开生词本标签页 |
+| 生词本点击单词头部 | 展开/收起翻译与例句，可发音 |
+| 网页右侧圆形按钮 | 点击关闭/恢复当前网页的生词高亮（逐站点记忆） |
+| 生词本/已背/句子收藏左侧日期栏 | 点击某日期快速定位到当天分组；点日期标题可折叠/展开 |
+| 删除模式下点击/拖拽卡片 | 点击卡片任意位置选中，按住拖拽可批量选中 |
+| 「背单词」标签 | 加权随机抽词，自动发音，例句先显示，标记认识/不认识 |
+| 「背单词」范围/模式 | 生词本词书可全背/按日期/按来源；可选全随机或补充模式 |
+| 「已背」标签 | 按日期查看，勾选后「忘记词」 |
+| 「句子收藏」标签 | 按时间倒序浏览收藏句子，可发音、删除 |
+| 「设置」标签 | 配置有道密钥、划句快捷键、加载完整词典 |
+
+## 数据存储说明
+
+生词数据存放在 `chrome.storage.local` 的 `words` 字段中，键为词形还原后的原型（小写）：
+
+```json
+{
+  "eat": {
+    "word": "eat",
+    "translation": "吃",
+    "phonetic": "iːt",
+    "explains": ["vt. 吃；喝", "vi. 进食"],
+    "senses": [{ "pos": "vt", "text": "吃；喝" }, { "pos": "vi", "text": "进食" }],
+    "definitions": ["to take food into the mouth and swallow it"],
+    "sentences": ["I ate an apple this morning."],
+    "addedAt": 1690000000000,
+    "unknownCount": 2,
+    "knownCount": 1,
+    "status": "pending",
+    "memorizedAt": null,
+    "reviewStage": 0,
+    "nextReviewAt": null,
+    "lastReviewedAt": 1690000100000
+  }
+}
+```
+
+有道翻译密钥与划句快捷键存放在 `config` 字段中；句子收藏存放在 `sentences` 字段（数组，按 `addedAt` 倒序）：
+
+```json
+[
+  { "id": "s-1690000000000-abc123", "text": "This is an example sentence.", "translation": "这是一个例句。", "addedAt": 1690000000000 }
+]
+```
+
+自定义词典元信息存放在 `customDicts` 字段（数组，元素为 `{ id, title, count, addedAt }`），**数组顺序即查询优先级**：
+
+```json
+[
+  { "id": "c_m1k2x3", "title": "COBUILD 8", "count": 12345, "addedAt": 1690000000000 },
+  { "id": "c_n9a8b7", "title": "LDOCE5++", "count": 98765, "addedAt": 1690000100000 }
+]
+```
+
+预设词书的复习进度独立存放在 `presetState` 字段（键为 `<presetId>\u0000<word>`），避免与 `words` 混淆：
+
+```json
+{
+  "cet4\u0000abandon": { "status": "pending", "unknownCount": 1, "knownCount": 0, "reviewStage": 0 }
+}
+```
+
+词书过滤状态、词典查询优先级与每本词书的高亮颜色分别存于 `presetFilters`、`dictOrder`、`appearance.bookColors`：
+
+```json
+{
+  "presetFilters": { "cet4": { "removeCommon": true, "removeMemorized": true } },
+  "dictOrder": ["builtin", "ecdict", "preset", "custom:c_m1k2x3"],
+  "appearance": { "bookColors": { "cet4": "#ffd6a5" } }
+}
+```
+
+预设词表的富化字段（音标 / 词性多义 / 英文释义 / 例句）直接写入 IndexedDB 的 `preset` 存储对应词条中。
+
+IndexedDB 的 `custom` 存储使用 `dictId\u0000word` 作为复合主键，并建有 `byDict`（`dictId`）索引，用于多词典并存、按词典删除与按优先级查询；`preset` 存储保存预设词表内容（词条与来源 `sources`）。
+
+## 注意事项与局限
+
+- **有道 API 配额**：免费版有道翻译有调用次数/字符数限制；本地词典可大幅减少 API 调用。
+- **词形还原**：自写轻量还原表 + 规则后缀处理，覆盖绝大多数常见词；个别歧义词可能还原不精确（可结合词典二次校正）。
+- **高亮范围**：为避免破坏页面，脚本会跳过 `script`、`style`、输入框、代码块等标签内的文本。
+- **单词边界**：带连字符/撇号的单词（如 `well-known`、`don't`）支持识别，但极端情况下可能高亮不精确。
+- **动态页面**：已通过 `MutationObserver` 处理动态加载内容，但极高频刷新的页面可能带来少量性能开销。
+- **文件协议**：如需在 `file://` 本地页面上使用，请在扩展详情页开启「允许访问文件网址」。
+- **发音依赖**：使用浏览器内置 `speechSynthesis`，效果取决于系统语音库；离线也可用。
+- **快捷键**：划句翻译默认快捷键为 Alt+T；
+
+## 可能的改进方向
+
+- 支持自定义高亮颜色、多语言翻译。
+- 自定义词典支持 MDD 资源文件（发音/图片）与 LZO 压缩、更多编码格式。
+- 导出/导入生词本（JSON / CSV）。
+- 更精确的词形还原库（如 `compromise` / `javascript-lemmatizer`）作为可选增强。
 
 ## License
 
 © 2026 [dooOoozen](https://github.com/dooOoozen). Licensed under the [Creative Commons Attribution-NonCommercial 4.0 International](https://creativecommons.org/licenses/by-nc/4.0/) (CC BY-NC 4.0) license.
 
-You may freely modify and use this project, but **not for commercial purposes**; attribution to the author is required when using or redistributing it.
+本项目可自由修改与使用，但**不得用于商业用途**；使用或转载时**须标明作者**。
