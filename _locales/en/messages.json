@@ -1,0 +1,8 @@
+{
+  "appName": {
+    "message": "Vocabulary-highlight"
+  },
+  "appDesc": {
+    "message": "Double-click any English word on a webpage to highlight, translate, pronounce, and save it to your vocabulary notebook, with automatic example-sentence capture. Supports lemmatization, phrase lookup, sentence translation, local dictionaries, preset wordbooks, and Ebbinghaus-based review."
+  }
+}

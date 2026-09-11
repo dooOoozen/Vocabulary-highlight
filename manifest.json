@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "双击高亮单词",
+  "name": "__MSG_appName__",
   "version": "2.9.0",
-  "description": "双击网页英文单词即可高亮、翻译、发音并收藏入生词本，同时自动抓取所在句子作为例句；支持词形还原、短语查询、划句翻译、本地词典、预设词书与基于艾宾浩斯曲线的背单词复习。",
+  "description": "__MSG_appDesc__",
+  "default_locale": "zh_CN",
   "permissions": ["storage", "unlimitedStorage"],
   "host_permissions": [
     "https://openapi.youdao.com/*",
@@ -20,7 +21,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "打开双击高亮单词"
+    "default_title": "__MSG_appName__"
   },
   "content_scripts": [
     {
