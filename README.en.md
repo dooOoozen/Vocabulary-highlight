@@ -6,6 +6,17 @@ English | [中文](README.md)
 
 A Manifest V3 Chrome extension that turns web reading into vocabulary learning: double-click any English word to highlight, translate, pronounce, and save it to your notebook — with inflection-aware highlighting, Ebbinghaus-based review, preset wordbooks, and sentence translation. All data stays local.
 
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Translation API Configuration](#translation-api-configuration)
+- [Dictionaries](#dictionaries)
+- [Project Structure](#project-structure)
+- [Data Sources & Copyright](#data-sources--copyright)
+- [License](#license)
+- [Changelog](CHANGELOG.md)
+
 ## Features
 
 - **Double-click lookup + lemmatization** — double-click any English word on a page to reduce it to its lemma (`ate` → `eat`, `cats` → `cat`, `bigger` → `big`) and look it up instantly.
